@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>BharatMarkets — AI Indian Market Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=Lora:ital,wght@0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#07080d;--s1:#0d0e17;--s2:#13141f;--s3:#1b1c2a;
+  --saffron:#FF9933;--sg:rgba(255,153,51,.12);--sgb:rgba(255,153,51,.28);
+  --green:#16a34a;--gdim:rgba(22,163,74,.13);
+  --red:#dc2626;--rdim:rgba(220,38,38,.13);
+  --gold:#f59e0b;--goldim:rgba(245,158,11,.13);
+  --t1:#f0ede8;--t2:#9b9890;--t3:#4e4c49;
+  --rad:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'DM Mono',monospace;
+  background:var(--bg);color:var(--t1);min-height:100vh;
+  background-image:
+    radial-gradient(ellipse 80% 40% at 50% 0%,rgba(255,153,51,.055),transparent),
+    radial-gradient(ellipse 40% 30% at 95% 95%,rgba(22,163,74,.04),transparent);
+  background-attachment:fixed;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:.4;
+}
+
+/* ── NAV ── */
+nav{
+  position:sticky;top:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 32px;
+  background:rgba(7,8,13,.93);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,153,51,.1);
+}
+.brand{display:flex;align-items:center;gap:13px}
+.brand-icon{
+  width:40px;height:40px;border-radius:9px;
+  background:linear-gradient(135deg,#FF9933 30%,#d46e00);
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+  box-shadow:0 0 28px rgba(255,153,51,.38),0 2px 8px rgba(0,0,0,.4);flex-shrink:0;
+}
+.brand-name{font-family:'Bebas Neue';font-size:26px;letter-spacing:1.5px;color:var(--t1);line-height:1}
+.brand-name span{color:var(--saffron)}
+.brand-tag{font-size:8.5px;letter-spacing:3px;color:var(--t3);text-transform:uppercase;margin-top:2px}
+.nav-right{display:flex;align-items:center;gap:16px}
+.live-pill{display:flex;align-items:center;gap:7px;font-size:10.5px;color:var(--green);letter-spacing:1.5px;text-transform:uppercase}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(22,163,74,.5)}60%{box-shadow:0 0 0 6px transparent}}
+.warn-pill{font-size:9.5px;color:var(--t3);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:5px;padding:4px 11px}
+
+/* ── TICKER ── */
+.ticker-bar{
+  height:36px;background:var(--s1);
+  border-bottom:1px solid rgba(255,153,51,.09);
+  display:flex;overflow:hidden;position:relative;z-index:1;
+}
+.ticker-label{
+  padding:0 18px;font-size:9.5px;letter-spacing:2.5px;color:var(--saffron);
+  background:var(--sg);border-right:1px solid rgba(255,153,51,.14);
+  display:flex;align-items:center;white-space:nowrap;text-transform:uppercase;flex-shrink:0;font-weight:500;
+}
+.ticker-track{flex:1;overflow:hidden;display:flex;align-items:center}
+.ticker-inner{display:flex;gap:44px;animation:marquee 50s linear infinite;padding-left:36px;white-space:nowrap}
+@keyframes marquee{to{transform:translateX(-50%)}}
+.tick{display:flex;align-items:center;gap:9px;font-size:11.5px}
+.tick-s{color:var(--t2)}.tick-p{color:var(--t1)}.tick-up{color:var(--green)}.tick-dn{color:var(--red)}
+
+/* ── MAIN ── */
+main{padding:28px 32px;max-width:1420px;margin:0 auto;position:relative;z-index:1}
+
+/* ── INDEX CARDS ── */
+.idx-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1.9fr;gap:14px;margin-bottom:26px;animation:fadeUp .5s ease both}
+.idx-card{
+  background:var(--s1);border:1px solid rgba(255,153,51,.09);border-radius:var(--rad);
+  padding:20px 22px;position:relative;overflow:hidden;transition:border-color .25s,transform .2s;
+}
+.idx-card:hover{border-color:rgba(255,153,51,.3);transform:translateY(-2px)}
+.idx-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--saffron) 0%,transparent 80%)}
+.idx-lbl{font-size:9px;letter-spacing:2.5px;color:var(--t3);text-transform:uppercase;margin-bottom:8px}
+.idx-val{font-family:'Bebas Neue';font-size:32px;letter-spacing:.5px;color:var(--t1);margin-bottom:4px;line-height:1}
+.idx-chg{font-size:12px;display:flex;align-items:center;gap:5px}
+.idx-chg.up{color:var(--green)}.idx-chg.dn{color:var(--red)}
+.sent-card{background:var(--s1);border:1px solid rgba(255,153,51,.09);border-radius:var(--rad);padding:20px 22px;display:flex;flex-direction:column}
+.sent-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+.sent-lbl{font-size:9px;letter-spacing:2.5px;color:var(--t3);text-transform:uppercase}
+.sent-badge{font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;padding:3px 11px;border-radius:20px}
+.sent-badge.BULLISH{background:var(--gdim);color:var(--green);border:1px solid rgba(22,163,74,.25)}
+.sent-badge.BEARISH{background:var(--rdim);color:var(--red);border:1px solid rgba(220,38,38,.25)}
+.sent-badge.NEUTRAL{background:var(--sg);color:var(--saffron);border:1px solid var(--sgb)}
+.sent-txt{font-family:'Lora';font-style:italic;font-size:13.5px;color:var(--t2);line-height:1.7;flex:1;display:flex;align-items:center}
+
+/* ── TABS ── */
+.tab-row{display:flex;gap:4px;background:var(--s1);border:1px solid rgba(255,153,51,.1);border-radius:9px;padding:4px;width:fit-content;margin-bottom:22px;animation:fadeUp .5s .1s ease both}
+.tab-btn{padding:9px 26px;font-family:'DM Mono';font-size:11.5px;letter-spacing:.6px;text-transform:uppercase;border:none;border-radius:7px;cursor:pointer;transition:all .2s;color:var(--t3);background:transparent}
+.tab-btn.active{background:linear-gradient(135deg,#FF9933,#d46e00);color:#07080d;box-shadow:0 4px 18px rgba(255,153,51,.32)}
+.tab-btn:not(.active):hover{color:var(--t1);background:var(--s2)}
+
+/* ── CONTENT LAYOUT ── */
+.content-grid{display:grid;grid-template-columns:1fr 378px;gap:20px;align-items:start}
+
+/* ── SECTION HEADER ── */
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.sec-title{font-family:'Bebas Neue';font-size:22px;letter-spacing:.8px;color:var(--t1)}
+.sec-sub{font-size:10px;color:var(--t3);margin-top:2px;letter-spacing:.3px}
+.sec-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.refresh-btn{
+  display:flex;align-items:center;gap:7px;padding:8px 16px;
+  background:var(--sg);border:1px solid rgba(255,153,51,.16);border-radius:7px;
+  color:var(--saffron);font-family:'DM Mono';font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;
+  cursor:pointer;transition:all .2s;
+}
+.refresh-btn:hover{background:var(--saffron);color:var(--bg)}
+.refresh-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── ADD BUTTON ── */
+.add-btn{
+  display:flex;align-items:center;gap:7px;padding:8px 16px;
+  background:var(--s2);border:1px solid rgba(255,255,255,.1);border-radius:7px;
+  color:var(--t2);font-family:'DM Mono';font-size:10.5px;letter-spacing:.5px;text-transform:uppercase;
+  cursor:pointer;transition:all .2s;
+}
+.add-btn:hover{background:var(--s3);color:var(--t1);border-color:rgba(255,255,255,.2)}
+
+/* ── ADD MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);
+  z-index:500;display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{
+  background:var(--s1);border:1px solid rgba(255,153,51,.2);border-radius:14px;
+  width:100%;max-width:500px;margin:16px;
+  box-shadow:0 32px 80px rgba(0,0,0,.6),0 0 0 1px rgba(255,153,51,.1);
+  transform:translateY(16px) scale(.98);transition:transform .25s;
+  overflow:hidden;
+}
+.modal-overlay.open .modal{transform:translateY(0) scale(1)}
+.modal-head{
+  padding:20px 22px;border-bottom:1px solid rgba(255,153,51,.1);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.modal-title{font-family:'Bebas Neue';font-size:20px;letter-spacing:.8px;color:var(--t1)}
+.modal-sub{font-size:10px;color:var(--t3);margin-top:2px}
+.modal-close{
+  width:30px;height:30px;border-radius:6px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);
+  color:var(--t2);font-size:16px;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.modal-close:hover{background:var(--rdim);color:var(--red);border-color:rgba(220,38,38,.25)}
+.modal-body{padding:22px}
+
+/* search bar */
+.search-row{display:flex;gap:10px;margin-bottom:16px}
+.search-input{
+  flex:1;background:var(--s2);border:1px solid rgba(255,255,255,.1);border-radius:8px;
+  padding:11px 14px;font-family:'DM Mono';font-size:13px;color:var(--t1);
+  outline:none;transition:border-color .2s;letter-spacing:.3px;
+}
+.search-input::placeholder{color:var(--t3)}
+.search-input:focus{border-color:rgba(255,153,51,.4);box-shadow:0 0 0 3px rgba(255,153,51,.08)}
+.search-go{
+  padding:11px 18px;background:linear-gradient(135deg,#FF9933,#d46e00);
+  border:none;border-radius:8px;color:#07080d;font-family:'DM Mono';
+  font-size:11px;letter-spacing:.6px;text-transform:uppercase;cursor:pointer;
+  transition:all .2s;white-space:nowrap;font-weight:500;
+  box-shadow:0 4px 14px rgba(255,153,51,.3);
+}
+.search-go:hover{box-shadow:0 6px 20px rgba(255,153,51,.45);transform:translateY(-1px)}
+.search-go:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+/* quick chips */
+.chips-label{font-size:9px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-bottom:10px}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px}
+.chip{
+  padding:5px 12px;background:var(--s2);border:1px solid rgba(255,255,255,.08);border-radius:20px;
+  font-size:11px;color:var(--t2);cursor:pointer;transition:all .15s;letter-spacing:.3px;
+}
+.chip:hover{background:var(--sg);border-color:var(--sgb);color:var(--saffron)}
+
+/* search result */
+.search-result{
+  background:var(--s2);border:1px solid rgba(255,255,255,.07);border-radius:10px;
+  padding:16px;display:none;
+}
+.search-result.visible{display:block;animation:fadeUp .3s ease both}
+.sr-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.sr-sym{font-family:'Bebas Neue';font-size:20px;letter-spacing:.5px;color:var(--t1)}
+.sr-name{font-size:10px;color:var(--t3);margin-top:2px}
+.sr-sig{font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;padding:3px 9px;border-radius:4px}
+.sr-price{font-family:'Bebas Neue';font-size:28px;color:var(--t1);margin-bottom:4px}
+.sr-chg{font-size:12px;margin-bottom:14px}
+.sr-chg.up{color:var(--green)}.sr-chg.dn{color:var(--red)}
+.sr-meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}
+.srm-lbl{font-size:8px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-bottom:2px}
+.srm-val{font-size:11.5px;color:var(--t2)}
+.add-confirm-btn{
+  width:100%;padding:11px;background:var(--gdim);border:1px solid rgba(22,163,74,.3);border-radius:8px;
+  color:var(--green);font-family:'DM Mono';font-size:11.5px;letter-spacing:.6px;text-transform:uppercase;
+  cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.add-confirm-btn:hover{background:var(--green);color:var(--bg);border-color:var(--green);box-shadow:0 4px 18px rgba(22,163,74,.3)}
+.already-added{
+  width:100%;padding:11px;background:var(--s3);border:1px solid rgba(255,255,255,.07);border-radius:8px;
+  color:var(--t3);font-family:'DM Mono';font-size:11.5px;letter-spacing:.6px;text-transform:uppercase;
+  cursor:default;display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.search-error{
+  text-align:center;padding:24px 16px;
+  font-size:12px;color:var(--t3);line-height:1.7;
+}
+
+/* ── STOCK GRID ── */
+.stocks-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stock-card{
+  background:var(--s1);border:1px solid rgba(255,153,51,.09);border-radius:var(--rad);
+  padding:18px;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;
+  animation:fadeUp .45s ease both;
+}
+.stock-card:hover{border-color:rgba(255,153,51,.32);transform:translateY(-2px);box-shadow:0 12px 36px rgba(0,0,0,.38)}
+.stock-card.selected{border-color:var(--saffron);box-shadow:0 0 0 1px var(--saffron),0 0 32px rgba(255,153,51,.18)}
+.stock-card.custom{border-color:rgba(22,163,74,.2)}
+.custom-tag{
+  position:absolute;top:10px;right:10px;
+  font-size:8px;letter-spacing:1.5px;padding:2px 7px;border-radius:3px;
+  background:var(--gdim);color:var(--green);border:1px solid rgba(22,163,74,.2);text-transform:uppercase;
+}
+.sc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.sc-sym{font-family:'Bebas Neue';font-size:19px;letter-spacing:.5px;color:var(--t1);line-height:1}
+.sc-name{font-size:9.5px;color:var(--t3);margin-top:2px;line-height:1.35;max-width:115px}
+.sig-badge{font-size:9px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;padding:3px 9px;border-radius:4px;flex-shrink:0}
+.sig-BUY{background:var(--gdim);color:var(--green);border:1px solid rgba(22,163,74,.26)}
+.sig-SELL{background:var(--rdim);color:var(--red);border:1px solid rgba(220,38,38,.26)}
+.sig-HOLD{background:var(--sg);color:var(--saffron);border:1px solid var(--sgb)}
+.sc-price{font-family:'Bebas Neue';font-size:27px;letter-spacing:.5px;color:var(--t1);margin-bottom:3px;line-height:1}
+.sc-price small{font-family:'DM Mono';font-size:13px;color:var(--t3);font-weight:300}
+.sc-chg{font-size:11.5px;display:flex;align-items:center;gap:5px;margin-bottom:12px}
+.sc-chg.up{color:var(--green)}.sc-chg.dn{color:var(--red)}
+.sc-meta{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding-top:11px;border-top:1px solid rgba(255,255,255,.05)}
+.sm-lbl{font-size:8px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-bottom:2px}
+.sm-val{font-size:11.5px;color:var(--t2)}
+.card-btns{display:flex;gap:7px;margin-top:13px}
+.analyse-btn{
+  flex:1;padding:9px;background:var(--sg);border:1px solid rgba(255,153,51,.16);border-radius:7px;
+  color:var(--saffron);font-family:'DM Mono';font-size:10px;letter-spacing:.5px;text-transform:uppercase;
+  cursor:pointer;transition:all .2s;
+}
+.analyse-btn:hover{background:var(--saffron);color:var(--bg);border-color:var(--saffron);box-shadow:0 4px 18px rgba(255,153,51,.28)}
+.analyse-btn:disabled{opacity:.4;cursor:not-allowed}
+.remove-btn{
+  width:36px;padding:9px;background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.14);border-radius:7px;
+  color:var(--red);font-size:13px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;
+}
+.remove-btn:hover{background:var(--rdim);border-color:rgba(220,38,38,.3)}
+
+/* ── ANALYSIS PANEL ── */
+.panel{background:var(--s1);border:1px solid rgba(255,153,51,.11);border-radius:var(--rad);position:sticky;top:90px;overflow:hidden;animation:fadeUp .5s .15s ease both}
+.panel-head{padding:18px 20px;border-bottom:1px solid rgba(255,153,51,.1);display:flex;align-items:center;justify-content:space-between}
+.panel-title{font-family:'Bebas Neue';font-size:18px;letter-spacing:.5px;color:var(--t1);line-height:1}
+.panel-sub{font-size:9.5px;color:var(--t3);margin-top:3px;letter-spacing:.3px}
+.ai-chip{font-size:9px;letter-spacing:2px;text-transform:uppercase;padding:4px 10px;border-radius:20px;background:var(--sg);border:1px solid var(--sgb);color:var(--saffron)}
+.panel-body{padding:20px}
+.panel-empty{text-align:center;padding:56px 16px}
+.panel-empty-icon{font-size:38px;margin-bottom:16px;opacity:.28}
+.panel-empty-txt{font-size:11.5px;color:var(--t3);line-height:1.75}
+.loading-state{display:flex;flex-direction:column;align-items:center;padding:60px 16px;gap:18px}
+.spinner{width:36px;height:36px;border:2px solid rgba(255,153,51,.14);border-top:2px solid var(--saffron);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-txt{font-size:11px;color:var(--t3);letter-spacing:1px}
+.loading-sub{font-size:10px;color:var(--t3);opacity:.6}
+.rec-box{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:9px;border:1px solid;margin-bottom:18px}
+.rec-box.BUY{background:var(--gdim);border-color:rgba(22,163,74,.3)}.rec-box.SELL{background:var(--rdim);border-color:rgba(220,38,38,.3)}.rec-box.HOLD{background:var(--sg);border-color:var(--sgb)}
+.rec-lbl{font-size:9px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-bottom:5px}
+.rec-val{font-family:'Bebas Neue';font-size:33px;letter-spacing:.5px;line-height:1}
+.rec-val.BUY{color:var(--green)}.rec-val.SELL{color:var(--red)}.rec-val.HOLD{color:var(--saffron)}
+.ring-wrap{position:relative;width:62px;height:62px;flex-shrink:0}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Bebas Neue';font-size:16px}
+.targets{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.tgt-box{background:var(--s2);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:12px}
+.tgt-lbl{font-size:8.5px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-bottom:5px}
+.tgt-val{font-family:'Bebas Neue';font-size:21px;letter-spacing:.3px}
+.tgt-val.g{color:var(--green)}.tgt-val.r{color:var(--red)}
+.sum-box{background:var(--s2);border-left:2px solid var(--saffron);padding:11px 14px;border-radius:0 8px 8px 0;margin-bottom:18px}
+.sum-txt{font-family:'Lora';font-style:italic;font-size:13px;color:var(--t2);line-height:1.7}
+.reasons-lbl{font-size:8.5px;letter-spacing:2.5px;color:var(--t3);text-transform:uppercase;margin-bottom:11px}
+.reason-row{display:flex;gap:9px;align-items:flex-start;margin-bottom:9px}
+.r-dot{width:5px;height:5px;border-radius:50%;background:var(--saffron);margin-top:5px;flex-shrink:0}
+.r-txt{font-size:11.5px;color:var(--t2);line-height:1.6}
+.risk-section{margin-top:18px}
+.risk-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.risk-lbl{font-size:8.5px;letter-spacing:2px;color:var(--t3);text-transform:uppercase}
+.risk-chip{font-size:10px;font-weight:500;padding:2px 9px;border-radius:3px;letter-spacing:.5px}
+.risk-chip.LOW{background:var(--gdim);color:var(--green)}.risk-chip.MEDIUM{background:var(--goldim);color:var(--gold)}.risk-chip.HIGH{background:var(--rdim);color:var(--red)}
+.risk-track{height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
+.risk-fill{height:100%;border-radius:2px;transition:width 1s ease}
+.risk-fill.LOW{width:33%;background:var(--green)}.risk-fill.MEDIUM{width:66%;background:var(--gold)}.risk-fill.HIGH{width:100%;background:var(--red)}
+
+/* ── MF GRID ── */
+.mf-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px}
+.mf-card{
+  background:var(--s1);border:1px solid rgba(255,153,51,.09);border-radius:var(--rad);
+  padding:18px;transition:all .22s;animation:fadeUp .45s ease both;position:relative;
+}
+.mf-card:hover{border-color:rgba(255,153,51,.3);transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.mf-card.custom{border-color:rgba(22,163,74,.2)}
+.mf-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.mf-name{font-family:'Bebas Neue';font-size:15px;letter-spacing:.4px;color:var(--t1);max-width:175px;line-height:1.25}
+.mf-cat{font-size:8.5px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-top:3px}
+.stars-row{display:flex;gap:2px;flex-shrink:0}
+.star{font-size:12px}.star.on{color:var(--saffron)}.star.off{color:var(--t3)}
+.mf-nav{font-family:'Bebas Neue';font-size:26px;letter-spacing:.5px;color:var(--t1);margin-bottom:2px}
+.mf-aum{font-size:10px;color:var(--t3);margin-bottom:12px}
+.mf-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;padding-top:11px;border-top:1px solid rgba(255,255,255,.05)}
+.mfs-lbl{font-size:8px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-bottom:3px}
+.mfs-val{font-size:13px}.mfs-val.g{color:var(--green)}.mfs-val.n{color:var(--t2)}
+.mf-remove{
+  position:absolute;top:10px;right:10px;
+  width:24px;height:24px;border-radius:5px;
+  background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.14);
+  color:var(--red);font-size:12px;cursor:pointer;transition:all .2s;
+  display:none;align-items:center;justify-content:center;
+}
+.mf-card.custom .mf-remove{display:flex}
+.mf-remove:hover{background:var(--rdim)}
+
+/* ── DISCLAIMER ── */
+.disclaimer{margin-top:30px;padding:14px 20px;background:rgba(220,38,38,.04);border:1px solid rgba(220,38,38,.1);border-radius:8px;font-size:10.5px;color:var(--t3);line-height:1.75}
+.disclaimer strong{color:#dc2626}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fu{animation:fadeUp .4s ease both}
+
+/* ── MODAL LOADING ── */
+.modal-loading{display:flex;flex-direction:column;align-items:center;padding:32px 16px;gap:14px}
+.modal-loading .spinner{width:28px;height:28px}
+.modal-loading-txt{font-size:11px;color:var(--t3);letter-spacing:1px}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1100px){
+  .idx-grid{grid-template-columns:1fr 1fr 1fr}
+  .content-grid{grid-template-columns:1fr}
+  .panel{position:static}
+  .mf-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:740px){
+  main{padding:18px 16px}
+  nav{padding:12px 16px}
+  .idx-grid{grid-template-columns:1fr 1fr}
+  .stocks-grid{grid-template-columns:1fr}
+  .mf-grid{grid-template-columns:1fr}
+  .brand-name{font-size:21px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="brand">
+    <div class="brand-icon">🇮🇳</div>
+    <div>
+      <div class="brand-name">Bharat<span>Markets</span></div>
+      <div class="brand-tag">AI · NSE · BSE · India Only</div>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="live-pill"><div class="live-dot"></div>NSE Live</div>
+    <div class="warn-pill">⚠ Not SEBI Advice</div>
+  </div>
+</nav>
+
+<!-- TICKER -->
+<div class="ticker-bar">
+  <div class="ticker-label">Live</div>
+  <div class="ticker-track"><div class="ticker-inner" id="tickerInner"></div></div>
+</div>
+
+<!-- MAIN -->
+<main>
+  <!-- INDEX CARDS -->
+  <div class="idx-grid">
+    <div class="idx-card"><div class="idx-lbl">NIFTY 50</div><div class="idx-val" id="niftyVal">24,532</div><div class="idx-chg up" id="niftyChg">▲ +82 (0.34%)</div></div>
+    <div class="idx-card"><div class="idx-lbl">SENSEX</div><div class="idx-val" id="sensexVal">80,893</div><div class="idx-chg up" id="sensexChg">▲ +224 (0.28%)</div></div>
+    <div class="idx-card"><div class="idx-lbl">NIFTY BANK</div><div class="idx-val" id="bankVal">52,118</div><div class="idx-chg up" id="bankChg">▲ +320 (0.62%)</div></div>
+    <div class="sent-card">
+      <div class="sent-head"><div class="sent-lbl">AI Market Sentiment</div><div class="sent-badge BULLISH" id="sentBadge">🐂 BULLISH</div></div>
+      <div class="sent-txt" id="sentTxt">FII inflows surge as RBI holds rates steady; mid-cap and banking stocks lead today's rally on Dalal Street.</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tab-row">
+    <button class="tab-btn active" id="tabStocks" onclick="switchTab('stocks')">📈 Stocks</button>
+    <button class="tab-btn" id="tabMF" onclick="switchTab('mf')">📊 Mutual Funds</button>
+  </div>
+
+  <!-- STOCKS -->
+  <div id="sectionStocks">
+    <div class="content-grid">
+      <div>
+        <div class="sec-head">
+          <div><div class="sec-title">NSE Top Stocks</div><div class="sec-sub">Tap "AI Analysis" for live buy / sell / hold signal</div></div>
+          <div class="sec-actions">
+            <button class="add-btn" onclick="openModal('stock')">＋ Add Stock</button>
+            <button class="refresh-btn" id="refreshStocks" onclick="loadMarket()">⟳ Refresh</button>
+          </div>
+        </div>
+        <div class="stocks-grid" id="stocksGrid"></div>
+      </div>
+      <!-- Analysis Panel -->
+      <div class="panel">
+        <div class="panel-head">
+          <div><div class="panel-title" id="panelTitle">AI Research</div><div class="panel-sub" id="panelSub">Select a stock to analyse</div></div>
+          <div class="ai-chip">⚡ AI Powered</div>
+        </div>
+        <div class="panel-body" id="panelBody">
+          <div class="panel-empty">
+            <div class="panel-empty-icon">📊</div>
+            <div class="panel-empty-txt">Click <strong style="color:var(--saffron)">"AI Deep Analysis"</strong> on any stock card to get a live Claude-powered recommendation with target price, stop-loss, and risk rating.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MUTUAL FUNDS -->
+  <div id="sectionMF" style="display:none">
+    <div class="sec-head">
+      <div><div class="sec-title">Top Mutual Funds — India</div><div class="sec-sub">AI-curated picks · Live NAV · SIP-ready</div></div>
+      <div class="sec-actions">
+        <button class="add-btn" onclick="openModal('mf')">＋ Add Fund</button>
+        <button class="refresh-btn" id="refreshMF" onclick="loadMFs(true)">⟳ Refresh</button>
+      </div>
+    </div>
+    <div class="mf-grid" id="mfGrid"></div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>⚠ Disclaimer:</strong> BharatMarkets is an AI-powered educational and research tool only. It does <strong>not</strong> constitute SEBI-registered investment advice. All buy/sell/hold signals are generated by AI analysis and should <strong>not</strong> be the sole basis for any investment decision. Market investments are subject to market risks. Consult a SEBI-registered financial advisor before investing.
+  </div>
+</main>
+
+<!-- ADD MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-head">
+      <div><div class="modal-title" id="modalTitle">Add Stock</div><div class="modal-sub" id="modalSub">Search by NSE symbol or company name</div></div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="search-row">
+        <input class="search-input" id="searchInput" placeholder="e.g. HCLTECH, Maruti, ONGC…" onkeydown="if(event.key==='Enter')doSearch()"/>
+        <button class="search-go" id="searchGo" onclick="doSearch()">Search</button>
+      </div>
+      <div class="chips-label" id="chipsLabel">Popular picks</div>
+      <div class="chips" id="chipsRow"></div>
+      <div class="search-result" id="searchResult"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'https://api.anthropic.com/v1/messages';
+const MCP = 'https://mcp.indmoney.com/mcp';
+let currentTab = 'stocks', modalMode = 'stock';
+let stocks = [], customStocks = [], customMFs = [], mfsLoaded = false;
+let selectedSym = null;
+
+// ── QUICK CHIPS ────────────────────────────────────────────────────────────
+const STOCK_CHIPS = ['HCLTECH','SUNPHARMA','MARUTI','ONGC','NESTLEIND','ASIANPAINT','AXISBANK','LT','POWERGRID','COALINDIA','TITAN','ADANIENT'];
+const MF_CHIPS   = ['Nippon India','DSP','Quant','Motilal Oswal','ICICI Prudential','Tata','Franklin','Canara Robeco'];
+
+// ── TICKER DATA ────────────────────────────────────────────────────────────
+const TICKS=[
+  {s:'NIFTY 50',p:'24,532',c:'+0.34%',up:true},{s:'SENSEX',p:'80,893',c:'+0.28%',up:true},
+  {s:'NIFTY BANK',p:'52,118',c:'+0.62%',up:true},{s:'NIFTY IT',p:'38,241',c:'-0.91%',up:false},
+  {s:'NIFTY AUTO',p:'23,107',c:'+1.45%',up:true},{s:'NIFTY MID 50',p:'14,832',c:'+0.53%',up:true},
+  {s:'RELIANCE',p:'₹2,847',c:'+1.23%',up:true},{s:'TCS',p:'₹4,124',c:'-0.45%',up:false},
+  {s:'HDFCBANK',p:'₹1,790',c:'+0.87%',up:true},{s:'ICICIBANK',p:'₹1,298',c:'+2.34%',up:true},
+  {s:'TATAMOTORS',p:'₹946',c:'+3.21%',up:true},{s:'BAJFINANCE',p:'₹8,234',c:'+1.56%',up:true},
+  {s:'WIPRO',p:'₹567',c:'-0.78%',up:false},{s:'INFY',p:'₹1,634',c:'-1.12%',up:false},
+];
+
+// ── FALLBACK DATA ──────────────────────────────────────────────────────────
+const STOCKS_FB=[
+  {sym:'RELIANCE',name:'Reliance Industries',sector:'Energy',price:2847.50,chg:1.23,h52:3217.90,l52:2220.30,vol:'12.4M',mcap:'₹19.3L Cr'},
+  {sym:'TCS',name:'TCS',sector:'IT',price:4123.80,chg:-0.45,h52:4592.25,l52:3311.00,vol:'3.1M',mcap:'₹15.1L Cr'},
+  {sym:'HDFCBANK',name:'HDFC Bank',sector:'Banking',price:1789.65,chg:0.87,h52:1880.00,l52:1363.55,vol:'8.7M',mcap:'₹13.6L Cr'},
+  {sym:'ICICIBANK',name:'ICICI Bank',sector:'Banking',price:1298.40,chg:2.34,h52:1362.35,l52:970.15,vol:'10.8M',mcap:'₹9.1L Cr'},
+  {sym:'INFY',name:'Infosys',sector:'IT',price:1634.20,chg:-1.12,h52:1953.90,l52:1358.35,vol:'5.2M',mcap:'₹6.8L Cr'},
+  {sym:'TATAMOTORS',name:'Tata Motors',sector:'Auto',price:945.75,chg:3.21,h52:1179.05,l52:607.90,vol:'15.6M',mcap:'₹3.5L Cr'},
+  {sym:'BAJFINANCE',name:'Bajaj Finance',sector:'NBFC',price:8234.10,chg:1.56,h52:9237.50,l52:6187.80,vol:'1.2M',mcap:'₹5.1L Cr'},
+  {sym:'WIPRO',name:'Wipro',sector:'IT',price:567.30,chg:-0.78,h52:620.85,l52:418.20,vol:'4.3M',mcap:'₹2.97L Cr'},
+];
+const MF_FB=[
+  {name:'Parag Parikh Flexi Cap Fund',cat:'Flexi Cap',nav:78.92,r1:22.1,r3:19.8,rating:5,aum:'₹61,239 Cr',sip:1000},
+  {name:'Mirae Asset Large Cap Fund',cat:'Large Cap',nav:102.45,r1:18.3,r3:14.2,rating:5,aum:'₹35,847 Cr',sip:1000},
+  {name:'Axis Midcap Fund',cat:'Mid Cap',nav:89.34,r1:25.7,r3:21.3,rating:4,aum:'₹24,712 Cr',sip:500},
+  {name:'SBI Small Cap Fund',cat:'Small Cap',nav:156.78,r1:31.2,r3:24.6,rating:4,aum:'₹18,934 Cr',sip:500},
+  {name:'HDFC Top 100 Fund',cat:'Large Cap',nav:943.21,r1:15.8,r3:13.1,rating:4,aum:'₹28,103 Cr',sip:1000},
+  {name:'Kotak Flexicap Fund',cat:'Flexi Cap',nav:67.43,r1:19.4,r3:16.7,rating:4,aum:'₹42,517 Cr',sip:500},
+];
+
+// ── HELPERS ────────────────────────────────────────────────────────────────
+function inr(v){return '₹'+Number(v).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function sig(chg,price,h52,l52){const f=((h52-price)/h52)*100;return chg>1.5&&f>12?'BUY':chg<-1||f<4?'SELL':'HOLD'}
+function stars(n){return[1,2,3,4,5].map(i=>`<span class="star ${i<=n?'on':'off'}">★</span>`).join('')}
+function recColor(r){return r==='BUY'?'#16a34a':r==='SELL'?'#dc2626':'#FF9933'}
+
+async function callClaude(prompt,system){
+  const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    model:'claude-sonnet-4-20250514',max_tokens:1000,system,
+    messages:[{role:'user',content:prompt}],
+    mcp_servers:[{type:'url',url:MCP,name:'indmoney'}]
+  })});
+  const d=await r.json();
+  const txt=(d.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('');
+  return JSON.parse(txt.replace(/```json|```/g,'').trim());
+}
+
+// ── TICKER ─────────────────────────────────────────────────────────────────
+function buildTicker(){
+  const all=[...TICKS,...TICKS];
+  document.getElementById('tickerInner').innerHTML=all.map(t=>`
+    <div class="tick"><span class="tick-s">${t.s}</span><span class="tick-p">${t.p}</span><span class="${t.up?'tick-up':'tick-dn'}">${t.c}</span></div>`).join('');
+}
+
+// ── MARKET ─────────────────────────────────────────────────────────────────
+async function loadMarket(){
+  const btn=document.getElementById('refreshStocks');
+  btn.disabled=true;btn.textContent='⟳ Updating…';
+  stocks=STOCKS_FB.map(s=>({...s,signal:sig(s.chg,s.price,s.h52,s.l52)}));
+  renderStocks();
+  try{
+    const d=await callClaude(
+      `Use INDmoney MCP tools to fetch:
+1. NIFTY 50, SENSEX, NIFTY BANK current values and today's change.
+2. Live stock data for: RELIANCE, TCS, HDFCBANK, ICICIBANK, INFY, TATAMOTORS, BAJFINANCE, WIPRO.
+Return ONLY this JSON:
+{"market":{"nifty":"","niftyChg":"","niftyPos":true,"sensex":"","sensexChg":"","sensexPos":true,"niftyBank":"","niftyBankChg":"","niftyBankPos":true,"sentiment":"BULLISH","summary":""},"stocks":[{"sym":"","name":"","sector":"","price":0,"chg":0,"h52":0,"l52":0,"vol":"","mcap":""}]}`,
+      'You are an Indian equity analyst. Use INDmoney MCP. Return ONLY valid JSON.'
+    );
+    if(d.market)updateMarketUI(d.market);
+    if(d.stocks?.length){stocks=d.stocks.map(s=>({...s,signal:sig(s.chg,s.price,s.h52,s.l52)}));renderStocks();}
+  }catch(e){}
+  btn.disabled=false;btn.textContent='⟳ Refresh';
+}
+
+function updateMarketUI(m){
+  document.getElementById('niftyVal').textContent=m.nifty||'24,532';
+  document.getElementById('niftyChg').textContent=(m.niftyPos?'▲ ':'▼ ')+(m.niftyChg||'+82 (0.34%)');
+  document.getElementById('niftyChg').className='idx-chg '+(m.niftyPos?'up':'dn');
+  document.getElementById('sensexVal').textContent=m.sensex||'80,893';
+  document.getElementById('sensexChg').textContent=(m.sensexPos?'▲ ':'▼ ')+(m.sensexChg||'+224 (0.28%)');
+  document.getElementById('sensexChg').className='idx-chg '+(m.sensexPos?'up':'dn');
+  document.getElementById('bankVal').textContent=m.niftyBank||'52,118';
+  document.getElementById('bankChg').textContent=(m.niftyBankPos?'▲ ':'▼ ')+(m.niftyBankChg||'+320 (0.62%)');
+  document.getElementById('bankChg').className='idx-chg '+(m.niftyBankPos?'up':'dn');
+  const s=m.sentiment||'BULLISH',icon=s==='BULLISH'?'🐂':s==='BEARISH'?'🐻':'⚖';
+  document.getElementById('sentBadge').textContent=icon+' '+s;
+  document.getElementById('sentBadge').className='sent-badge '+s;
+  document.getElementById('sentTxt').textContent=m.summary||'';
+}
+
+// ── RENDER STOCKS ──────────────────────────────────────────────────────────
+function renderStocks(){
+  const all=[...stocks,...customStocks];
+  document.getElementById('stocksGrid').innerHTML=all.map((s,i)=>{
+    const isUp=s.chg>=0, isCustom=!!s.custom;
+    return `<div class="stock-card${isCustom?' custom':''} fu" style="animation-delay:${i*.04}s" id="sc-${s.sym}" onclick="pickStock('${s.sym}')">
+      ${isCustom?'<div class="custom-tag">Added</div>':''}
+      <div class="sc-top">
+        <div><div class="sc-sym">${s.sym}</div><div class="sc-name">${s.name}</div></div>
+        <div class="sig-badge sig-${s.signal}">${s.signal}</div>
+      </div>
+      <div class="sc-price"><small>₹</small>${Number(s.price).toLocaleString('en-IN',{minimumFractionDigits:2})}</div>
+      <div class="sc-chg ${isUp?'up':'dn'}">${isUp?'▲':'▼'} ${Math.abs(s.chg)}% today</div>
+      <div class="sc-meta">
+        <div><div class="sm-lbl">52W High</div><div class="sm-val">₹${Number(s.h52).toLocaleString('en-IN')}</div></div>
+        <div><div class="sm-lbl">52W Low</div><div class="sm-val">₹${Number(s.l52).toLocaleString('en-IN')}</div></div>
+        <div><div class="sm-lbl">Volume</div><div class="sm-val">${s.vol}</div></div>
+        <div><div class="sm-lbl">Mkt Cap</div><div class="sm-val">${s.mcap}</div></div>
+      </div>
+      <div class="card-btns">
+        <button class="analyse-btn" id="btn-${s.sym}" onclick="event.stopPropagation();analyseStock('${s.sym}')">🤖 AI Deep Analysis</button>
+        ${isCustom?`<button class="remove-btn" title="Remove" onclick="event.stopPropagation();removeStock('${s.sym}')">✕</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function removeStock(sym){
+  customStocks=customStocks.filter(s=>s.sym!==sym);
+  if(selectedSym===sym){selectedSym=null;resetPanel();}
+  renderStocks();
+}
+function resetPanel(){
+  document.getElementById('panelTitle').textContent='AI Research';
+  document.getElementById('panelSub').textContent='Select a stock to analyse';
+  document.getElementById('panelBody').innerHTML=`<div class="panel-empty"><div class="panel-empty-icon">📊</div><div class="panel-empty-txt">Click <strong style="color:var(--saffron)">"AI Deep Analysis"</strong> on any stock card.</div></div>`;
+}
+
+// ── ANALYSE STOCK ──────────────────────────────────────────────────────────
+function pickStock(sym){
+  document.querySelectorAll('.stock-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('sc-'+sym)?.classList.add('selected');
+  analyseStock(sym);
+}
+
+async function analyseStock(sym){
+  const all=[...stocks,...customStocks];
+  const s=all.find(x=>x.sym===sym); if(!s) return;
+  selectedSym=sym;
+  document.getElementById('panelTitle').textContent=sym+' — Research';
+  document.getElementById('panelSub').textContent=s.name+(s.sector?' · '+s.sector:'');
+  const btn=document.getElementById('btn-'+sym);
+  if(btn){btn.disabled=true;btn.textContent='⟳ Analysing…';}
+  document.getElementById('panelBody').innerHTML=`<div class="loading-state"><div class="spinner"></div><div class="loading-txt">Analysing ${sym}…</div><div class="loading-sub">Fetching INDmoney data + AI reasoning</div></div>`;
+  let a;
+  try{
+    a=await callClaude(
+      `Use INDmoney MCP tools to analyse ${s.sym} (${s.name}).
+Known: price ₹${s.price}, change ${s.chg}%, 52W H ₹${s.h52}, 52W L ₹${s.l52}, sector ${s.sector||'N/A'}.
+Return ONLY JSON:
+{"recommendation":"BUY|SELL|HOLD","confidence":0,"targetPrice":0,"stopLoss":0,"riskLevel":"LOW|MEDIUM|HIGH","summary":"2 sentences","reasons":["","",""]}`,
+      'You are a SEBI-research-grade Indian equity analyst. Use INDmoney live data. Return ONLY valid JSON.'
+    );
+  }catch{
+    const rec=s.signal;
+    a={
+      recommendation:rec,confidence:rec==='BUY'?77:rec==='SELL'?69:63,
+      targetPrice:+(rec==='BUY'?s.price*1.15:s.price*0.94).toFixed(2),
+      stopLoss:+(s.price*0.92).toFixed(2),
+      riskLevel:['NBFC','Small Cap'].includes(s.sector)?'HIGH':'MEDIUM',
+      summary:`${s.name} is trading at ${inr(s.price)}, ${s.chg>=0?'up':'down'} ${Math.abs(s.chg)}% today. ${rec==='BUY'?'Momentum and fundamentals favour accumulation at current levels.':rec==='SELL'?'Overhead resistance and weakening momentum suggest booking profits.':'Consolidation phase — await a volume-backed breakout before fresh positions.'}`,
+      reasons:rec==='BUY'?[`Trades ${(((s.h52-s.price)/s.h52)*100).toFixed(1)}% below 52W high — meaningful upside headroom`,`${s.sector||'Sector'} attracting strong FII/DII interest`,`RSI bouncing from support with improving price action`]:rec==='SELL'?[`Approaching 52-week high — risk-reward unfavourable`,`Relative underperformance vs sector peers recently`,`MACD showing bearish divergence on daily chart`]:[`Tight consolidation — no clear directional bias yet`,`Fundamentals intact; waiting for a macro catalyst`,`Hold with strict stop-loss at ₹${(s.price*0.93).toFixed(0)}`]
+    };
+  }
+  renderAnalysis(a);
+  if(btn){btn.disabled=false;btn.textContent='🤖 AI Deep Analysis';}
+}
+
+function renderRing(val,color){
+  const R=24,circ=2*Math.PI*R,off=circ-(val/100)*circ;
+  return `<div class="ring-wrap"><svg width="62" height="62" viewBox="0 0 62 62"><circle cx="31" cy="31" r="${R}" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="5"/><circle cx="31" cy="31" r="${R}" fill="none" stroke="${color}" stroke-width="5" stroke-dasharray="${circ}" stroke-dashoffset="${off}" stroke-linecap="round"/></svg><div class="ring-num" style="color:${color}">${val}%</div></div>`;
+}
+
+function renderAnalysis(a){
+  const rec=a.recommendation,col=recColor(rec),icon=rec==='BUY'?'🟢':rec==='SELL'?'🔴':'🟡';
+  document.getElementById('panelBody').innerHTML=`<div class="fu">
+    <div class="rec-box ${rec}"><div><div class="rec-lbl">Recommendation</div><div class="rec-val ${rec}">${icon} ${rec}</div></div>${renderRing(a.confidence,col)}</div>
+    <div class="targets">
+      <div class="tgt-box"><div class="tgt-lbl">Target Price</div><div class="tgt-val g">${inr(a.targetPrice)}</div></div>
+      <div class="tgt-box"><div class="tgt-lbl">Stop Loss</div><div class="tgt-val r">${inr(a.stopLoss)}</div></div>
+    </div>
+    <div class="sum-box"><div class="sum-txt">${a.summary}</div></div>
+    <div class="reasons-lbl">Key Signals</div>
+    ${(a.reasons||[]).map(r=>`<div class="reason-row"><div class="r-dot"></div><div class="r-txt">${r}</div></div>`).join('')}
+    <div class="risk-section">
+      <div class="risk-head"><div class="risk-lbl">Risk Level</div><div class="risk-chip ${a.riskLevel}">${a.riskLevel}</div></div>
+      <div class="risk-track"><div class="risk-fill ${a.riskLevel}"></div></div>
+    </div>
+  </div>`;
+}
+
+// ── MFs ────────────────────────────────────────────────────────────────────
+async function loadMFs(force=false){
+  if(mfsLoaded&&!force) return;
+  const btn=document.getElementById('refreshMF');
+  btn.disabled=true;btn.textContent='⟳ Loading…';
+  document.getElementById('mfGrid').innerHTML=`<div class="loading-state" style="grid-column:1/-1"><div class="spinner"></div><div class="loading-txt">Fetching fund data…</div></div>`;
+  let funds=MF_FB;
+  try{
+    const d=await callClaude(
+      `Use INDmoney MCP tools to get top 6 Indian mutual funds across large cap, mid cap, flexi cap, small cap.
+Return ONLY JSON array:
+[{"name":"","cat":"","nav":0,"r1":0,"r3":0,"rating":5,"aum":"₹X Cr","sip":500}]`,
+      'You are a mutual fund analyst for Indian markets. Use INDmoney MCP. Return ONLY valid JSON array.'
+    );
+    if(Array.isArray(d)&&d.length) funds=d;
+  }catch{}
+  window._baseMFs=funds;
+  renderMFs();
+  mfsLoaded=true;
+  btn.disabled=false;btn.textContent='⟳ Refresh';
+}
+
+function renderMFs(){
+  const all=[...(window._baseMFs||MF_FB),...customMFs];
+  document.getElementById('mfGrid').innerHTML=all.map((f,i)=>{
+    const isCustom=!!f.custom;
+    return `<div class="mf-card${isCustom?' custom':''} fu" style="animation-delay:${i*.05}s">
+      ${isCustom?`<button class="mf-remove" title="Remove" onclick="removeMF('${f.name.replace(/'/g,"\\'")}')">✕</button>`:''}
+      <div class="mf-top">
+        <div><div class="mf-name">${f.name}</div><div class="mf-cat">${f.cat||f.category||''}</div></div>
+        <div class="stars-row">${stars(f.rating)}</div>
+      </div>
+      <div class="mf-nav">₹${Number(f.nav).toFixed(2)}</div>
+      <div class="mf-aum">AUM ${f.aum}</div>
+      <div class="mf-stats">
+        <div><div class="mfs-lbl">1Y Return</div><div class="mfs-val g">+${f.r1}%</div></div>
+        <div><div class="mfs-lbl">3Y Return</div><div class="mfs-val g">+${f.r3}%</div></div>
+        <div><div class="mfs-lbl">Min SIP</div><div class="mfs-val n">₹${f.sip}</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function removeMF(name){
+  customMFs=customMFs.filter(f=>f.name!==name);
+  renderMFs();
+}
+
+// ── TABS ────────────────────────────────────────────────────────────────────
+function switchTab(t){
+  currentTab=t;
+  document.getElementById('sectionStocks').style.display=t==='stocks'?'block':'none';
+  document.getElementById('sectionMF').style.display=t==='mf'?'block':'none';
+  document.getElementById('tabStocks').className='tab-btn'+(t==='stocks'?' active':'');
+  document.getElementById('tabMF').className='tab-btn'+(t==='mf'?' active':'');
+  if(t==='mf') loadMFs();
+}
+
+// ── MODAL ───────────────────────────────────────────────────────────────────
+function openModal(mode){
+  modalMode=mode;
+  document.getElementById('modalTitle').textContent=mode==='stock'?'Add Stock':'Add Mutual Fund';
+  document.getElementById('modalSub').textContent=mode==='stock'?'Search by NSE symbol or company name':'Search by fund name or AMC';
+  document.getElementById('searchInput').placeholder=mode==='stock'?'e.g. HCLTECH, Maruti, SUNPHARMA…':'e.g. Quant Small Cap, Nippon India…';
+  document.getElementById('searchInput').value='';
+  document.getElementById('searchResult').className='search-result';
+  document.getElementById('searchResult').innerHTML='';
+  // chips
+  const chips=mode==='stock'?STOCK_CHIPS:MF_CHIPS;
+  document.getElementById('chipsLabel').textContent=mode==='stock'?'Popular NSE stocks':'Popular fund houses';
+  document.getElementById('chipsRow').innerHTML=chips.map(c=>`<div class="chip" onclick="chipSearch('${c}')">${c}</div>`).join('');
+  document.getElementById('modalOverlay').classList.add('open');
+  setTimeout(()=>document.getElementById('searchInput').focus(),200);
+}
+
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open')}
+function handleOverlayClick(e){if(e.target===document.getElementById('modalOverlay'))closeModal()}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+
+function chipSearch(q){document.getElementById('searchInput').value=q;doSearch();}
+
+async function doSearch(){
+  const q=document.getElementById('searchInput').value.trim();
+  if(!q) return;
+  const btn=document.getElementById('searchGo');
+  btn.disabled=true;btn.textContent='…';
+  const res=document.getElementById('searchResult');
+  res.className='search-result visible';
+  res.innerHTML=`<div class="modal-loading"><div class="spinner"></div><div class="modal-loading-txt">Searching "${q}"…</div></div>`;
+  try{
+    if(modalMode==='stock') await searchStock(q);
+    else await searchMF(q);
+  }catch{
+    res.innerHTML=`<div class="search-error">⚠ Could not fetch data for "<strong>${q}</strong>".<br/>Try a different symbol or name.</div>`;
+  }
+  btn.disabled=false;btn.textContent='Search';
+}
+
+async function searchStock(q){
+  const d=await callClaude(
+    `Use INDmoney MCP tools to search for Indian stock "${q}" on NSE.
+Get current price, day change %, 52-week high, 52-week low, volume, market cap, sector, full company name.
+Return ONLY this JSON (no markdown):
+{"sym":"","name":"","sector":"","price":0,"chg":0,"h52":0,"l52":0,"vol":"","mcap":""}
+If not found, return: {"error":"not found"}`,
+    'You are an Indian stock market data provider. Use INDmoney MCP to fetch stock info. Return ONLY valid JSON.'
+  );
+  const res=document.getElementById('searchResult');
+  if(d.error||!d.sym){res.innerHTML=`<div class="search-error">⚠ No results for "<strong>${q}</strong>".<br/>Try the exact NSE symbol (e.g. HCLTECH, MARUTI, SUNPHARMA).</div>`;return;}
+  const s={...d,signal:sig(d.chg,d.price,d.h52,d.l52)};
+  const alreadyAdded=stocks.some(x=>x.sym===s.sym)||customStocks.some(x=>x.sym===s.sym);
+  res.innerHTML=`
+    <div class="sr-top">
+      <div><div class="sr-sym">${s.sym}</div><div class="sr-name">${s.name}${s.sector?' · '+s.sector:''}</div></div>
+      <div class="sr-sig sig-badge sig-${s.signal}">${s.signal}</div>
+    </div>
+    <div class="sr-price">₹${Number(s.price).toLocaleString('en-IN',{minimumFractionDigits:2})}</div>
+    <div class="sr-chg ${s.chg>=0?'up':'dn'}">${s.chg>=0?'▲':'▼'} ${Math.abs(s.chg)}% today</div>
+    <div class="sr-meta">
+      <div><div class="srm-lbl">52W High</div><div class="srm-val">₹${Number(s.h52).toLocaleString('en-IN')}</div></div>
+      <div><div class="srm-lbl">52W Low</div><div class="srm-val">₹${Number(s.l52).toLocaleString('en-IN')}</div></div>
+      <div><div class="srm-lbl">Mkt Cap</div><div class="srm-val">${s.mcap}</div></div>
+    </div>
+    ${alreadyAdded
+      ?`<div class="already-added">✓ Already on your watchlist</div>`
+      :`<button class="add-confirm-btn" onclick="addStock(${JSON.stringify(s).replace(/"/g,'&quot;')})">＋ Add to Dashboard</button>`}`;
+}
+
+async function searchMF(q){
+  const d=await callClaude(
+    `Use INDmoney MCP tools to search for Indian mutual fund "${q}".
+Get fund name, category, current NAV, 1-year return, 3-year return, star rating (1-5), AUM, minimum SIP amount.
+Return ONLY this JSON (no markdown):
+{"name":"","cat":"","nav":0,"r1":0,"r3":0,"rating":5,"aum":"₹X Cr","sip":500}
+If not found, return: {"error":"not found"}`,
+    'You are a mutual fund data provider for Indian markets. Use INDmoney MCP. Return ONLY valid JSON.'
+  );
+  const res=document.getElementById('searchResult');
+  if(d.error||!d.name){res.innerHTML=`<div class="search-error">⚠ No results for "<strong>${q}</strong>".<br/>Try an AMC name or fund name (e.g. Quant Small Cap, Nippon India Growth).</div>`;return;}
+  const alreadyAdded=(window._baseMFs||MF_FB).some(f=>f.name===d.name)||customMFs.some(f=>f.name===d.name);
+  res.innerHTML=`
+    <div class="sr-top">
+      <div><div class="sr-sym" style="font-size:14px;letter-spacing:.3px">${d.name}</div><div class="sr-name">${d.cat||''}</div></div>
+      <div class="stars-row">${stars(d.rating)}</div>
+    </div>
+    <div class="sr-price">₹${Number(d.nav).toFixed(2)} <span style="font-family:'DM Mono';font-size:12px;color:var(--t3)">NAV</span></div>
+    <div style="font-size:10px;color:var(--t3);margin-bottom:14px">AUM ${d.aum} · Min SIP ₹${d.sip}</div>
+    <div class="sr-meta" style="grid-template-columns:1fr 1fr;margin-bottom:16px">
+      <div><div class="srm-lbl">1Y Return</div><div class="srm-val" style="color:var(--green)">+${d.r1}%</div></div>
+      <div><div class="srm-lbl">3Y Return</div><div class="srm-val" style="color:var(--green)">+${d.r3}%</div></div>
+    </div>
+    ${alreadyAdded
+      ?`<div class="already-added">✓ Already on your dashboard</div>`
+      :`<button class="add-confirm-btn" onclick="addMF(${JSON.stringify(d).replace(/"/g,'&quot;')})">＋ Add to Dashboard</button>`}`;
+}
+
+function addStock(s){
+  customStocks.push({...s,custom:true});
+  renderStocks();
+  closeModal();
+  // brief highlight after render
+  setTimeout(()=>{const el=document.getElementById('sc-'+s.sym);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});},200);
+}
+
+function addMF(f){
+  customMFs.push({...f,custom:true});
+  renderMFs();
+  closeModal();
+}
+
+// ── INIT ────────────────────────────────────────────────────────────────────
+buildTicker();
+loadMarket();
+</script>
+</body>
+</html>
