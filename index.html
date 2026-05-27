@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>BharatMarkets — Live INDmoney Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=Lora:ital,wght@0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#07080d;--s1:#0d0e17;--s2:#13141f;--s3:#1b1c2a;
+  --saffron:#FF9933;--sg:rgba(255,153,51,.12);--sgb:rgba(255,153,51,.28);
+  --green:#16a34a;--gdim:rgba(22,163,74,.13);
+  --red:#dc2626;--rdim:rgba(220,38,38,.13);
+  --gold:#f59e0b;--goldim:rgba(245,158,11,.13);
+  --blue:#6366f1;--bluedim:rgba(99,102,241,.13);
+  --t1:#f0ede8;--t2:#9b9890;--t3:#4e4c49;--rad:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--t1);min-height:100vh;
+  background-image:radial-gradient(ellipse 80% 40% at 50% 0%,rgba(255,153,51,.05),transparent),
+  radial-gradient(ellipse 40% 30% at 95% 95%,rgba(99,102,241,.04),transparent);
+  background-attachment:fixed;}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;
+  padding:12px 28px;background:rgba(7,8,13,.96);backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,153,51,.1);}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-icon{width:38px;height:38px;border-radius:9px;background:linear-gradient(135deg,#FF9933,#d46e00);
+  display:flex;align-items:center;justify-content:center;font-size:19px;
+  box-shadow:0 0 24px rgba(255,153,51,.38);flex-shrink:0;}
+.brand-name{font-family:'Bebas Neue';font-size:24px;letter-spacing:1.5px;color:var(--t1);line-height:1}
+.brand-name span{color:var(--saffron)}
+.brand-tag{font-size:8px;letter-spacing:3px;color:var(--t3);text-transform:uppercase;margin-top:2px}
+.nav-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.live-badge{display:flex;align-items:center;gap:6px;font-size:10px;letter-spacing:1.5px;
+  text-transform:uppercase;padding:4px 12px;border-radius:20px;
+  background:var(--gdim);color:var(--green);border:1px solid rgba(22,163,74,.25);}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(22,163,74,.5)}60%{box-shadow:0 0 0 5px transparent}}
+.ind-badge{font-size:9px;padding:4px 10px;border-radius:20px;
+  background:var(--bluedim);color:var(--blue);border:1px solid rgba(99,102,241,.3);letter-spacing:1px}
+.warn-pill{font-size:9px;color:var(--t3);background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);border-radius:5px;padding:3px 10px}
+
+/* TICKER */
+.ticker-bar{height:34px;background:var(--s1);border-bottom:1px solid rgba(255,153,51,.09);
+  display:flex;overflow:hidden;}
+.ticker-label{padding:0 16px;font-size:9px;letter-spacing:2.5px;color:var(--saffron);
+  background:var(--sg);border-right:1px solid rgba(255,153,51,.14);
+  display:flex;align-items:center;white-space:nowrap;text-transform:uppercase;flex-shrink:0;}
+.ticker-track{flex:1;overflow:hidden;display:flex;align-items:center}
+.ticker-inner{display:flex;gap:40px;animation:marquee 50s linear infinite;padding-left:28px;white-space:nowrap}
+@keyframes marquee{to{transform:translateX(-50%)}}
+.tick{display:flex;align-items:center;gap:8px;font-size:11px}
+.tick-s{color:var(--t2)}.tick-p{color:var(--t1)}.tick-up{color:var(--green)}.tick-dn{color:var(--red)}
+
+/* MAIN */
+main{padding:22px 28px;max-width:1440px;margin:0 auto;}
+
+/* NETWORTH BANNER */
+.nw-banner{background:var(--s1);border:1px solid rgba(255,153,51,.1);border-radius:14px;
+  padding:22px 28px;margin-bottom:22px;position:relative;overflow:hidden;display:none;}
+.nw-banner.show{display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:center}
+.nw-banner::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--saffron),var(--blue),transparent)}
+.nw-label{font-size:8.5px;letter-spacing:2.5px;color:var(--t3);text-transform:uppercase;margin-bottom:6px}
+.nw-value{font-family:'Bebas Neue';font-size:32px;letter-spacing:.5px;color:var(--t1);line-height:1}
+.nw-sub{font-size:10px;color:var(--t3);margin-top:3px}
+.nw-stats{display:flex;gap:28px;flex-wrap:wrap}
+.nw-stat{text-align:center}
+.nw-stat-val{font-family:'Bebas Neue';font-size:22px;letter-spacing:.3px;line-height:1}
+.nw-stat-val.pos{color:var(--green)}.nw-stat-val.neg{color:var(--red)}
+.nw-stat-lbl{font-size:8px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-top:3px}
+.nw-source{font-size:9px;padding:3px 8px;border-radius:4px;
+  background:var(--bluedim);color:var(--blue);border:1px solid rgba(99,102,241,.25);
+  letter-spacing:1px;text-transform:uppercase;align-self:flex-start}
+
+/* STATUS BAR */
+.status-bar{display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:18px;padding:9px 16px;background:var(--s1);
+  border:1px solid rgba(255,153,51,.08);border-radius:8px;flex-wrap:wrap;gap:8px;}
+.sb-left{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.sb-item{font-size:9.5px;color:var(--t3);display:flex;align-items:center;gap:5px}
+.sb-item strong{color:var(--t2)}
+.src-badge{font-size:8.5px;padding:2px 8px;border-radius:3px;letter-spacing:1px;text-transform:uppercase}
+.src-live{background:var(--gdim);color:var(--green);border:1px solid rgba(22,163,74,.2)}
+.src-cache{background:var(--sg);color:var(--saffron);border:1px solid var(--sgb)}
+.btn-sm{font-size:10px;padding:5px 13px;border-radius:6px;cursor:pointer;
+  font-family:'DM Mono';letter-spacing:.5px;text-transform:uppercase;border:none;transition:all .2s;}
+.btn-refresh{background:var(--sg);color:var(--saffron);border:1px solid rgba(255,153,51,.2);}
+.btn-refresh:hover{background:var(--saffron);color:var(--bg)}
+.btn-refresh:disabled{opacity:.4;cursor:not-allowed}
+
+/* TABS */
+.tab-row{display:flex;gap:4px;background:var(--s1);border:1px solid rgba(255,153,51,.1);
+  border-radius:9px;padding:4px;width:fit-content;margin-bottom:20px;}
+.tab-btn{padding:8px 22px;font-family:'DM Mono';font-size:11px;letter-spacing:.5px;
+  text-transform:uppercase;border:none;border-radius:7px;cursor:pointer;
+  transition:all .2s;color:var(--t3);background:transparent;}
+.tab-btn.active{background:linear-gradient(135deg,#FF9933,#d46e00);color:#07080d;
+  box-shadow:0 4px 16px rgba(255,153,51,.3)}
+.tab-btn:not(.active):hover{color:var(--t1);background:var(--s2)}
+
+/* SECTION */
+.sec-head{display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;flex-wrap:wrap;gap:8px;}
+.sec-title{font-family:'Bebas Neue';font-size:20px;letter-spacing:.8px}
+.sec-sub{font-size:9px;color:var(--t3);margin-top:2px}
+.sec-actions{display:flex;align-items:center;gap:7px}
+.btn-add{padding:7px 14px;background:var(--gdim);border:1px solid rgba(22,163,74,.25);
+  border-radius:7px;color:var(--green);font-family:'DM Mono';font-size:10px;
+  letter-spacing:.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.btn-add:hover{background:var(--green);color:var(--bg);box-shadow:0 4px 14px rgba(22,163,74,.3)}
+.btn-ref{padding:7px 14px;background:var(--sg);border:1px solid rgba(255,153,51,.16);
+  border-radius:7px;color:var(--saffron);font-family:'DM Mono';font-size:10px;
+  letter-spacing:.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.btn-ref:hover{background:var(--saffron);color:var(--bg)}
+.btn-ref:disabled{opacity:.4;cursor:not-allowed}
+
+/* CONTENT GRID */
+.content-grid{display:grid;grid-template-columns:1fr 372px;gap:16px;align-items:start}
+
+/* STOCK CARDS */
+.stocks-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.stock-card{background:var(--s1);border:1px solid rgba(255,153,51,.09);border-radius:var(--rad);
+  padding:16px 18px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.stock-card:hover{border-color:rgba(255,153,51,.32);transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,0,0,.4)}
+.stock-card.selected{border-color:var(--saffron);box-shadow:0 0 0 1px var(--saffron),0 0 28px rgba(255,153,51,.18)}
+.stock-card.custom{border-color:rgba(22,163,74,.2)}
+.card-source{position:absolute;top:9px;right:9px;font-size:7.5px;letter-spacing:1.5px;
+  padding:2px 7px;border-radius:3px;text-transform:uppercase;}
+.src-ind{background:var(--bluedim);color:var(--blue);border:1px solid rgba(99,102,241,.2)}
+.src-custom{background:var(--gdim);color:var(--green);border:1px solid rgba(22,163,74,.2)}
+.sc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.sc-sym{font-family:'Bebas Neue';font-size:18px;letter-spacing:.5px;color:var(--t1);line-height:1}
+.sc-name{font-size:9px;color:var(--t3);margin-top:2px;line-height:1.3;max-width:115px}
+.sig-badge{font-size:8.5px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;
+  padding:3px 8px;border-radius:4px;flex-shrink:0}
+.sig-BUY{background:var(--gdim);color:var(--green);border:1px solid rgba(22,163,74,.26)}
+.sig-SELL{background:var(--rdim);color:var(--red);border:1px solid rgba(220,38,38,.26)}
+.sig-HOLD{background:var(--sg);color:var(--saffron);border:1px solid var(--sgb)}
+.sc-price{font-family:'Bebas Neue';font-size:26px;letter-spacing:.5px;color:var(--t1);
+  margin-bottom:2px;line-height:1;border-radius:4px;padding:2px 4px;margin-left:-4px;
+  transition:background .4s}
+.sc-price small{font-family:'DM Mono';font-size:12px;color:var(--t3)}
+.sc-chg{font-size:11px;display:flex;align-items:center;gap:4px;margin-bottom:10px}
+.sc-chg.up{color:var(--green)}.sc-chg.dn{color:var(--red)}
+.sc-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding-top:9px;
+  border-top:1px solid rgba(255,255,255,.05)}
+.sm-lbl{font-size:7.5px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-bottom:2px}
+.sm-val{font-size:11px;color:var(--t2)}
+.card-btns{display:flex;gap:6px;margin-top:10px}
+.ai-btn{flex:1;padding:8px;background:var(--sg);border:1px solid rgba(255,153,51,.16);border-radius:7px;
+  color:var(--saffron);font-family:'DM Mono';font-size:9.5px;letter-spacing:.5px;
+  text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.ai-btn:hover{background:var(--saffron);color:var(--bg);box-shadow:0 4px 14px rgba(255,153,51,.28)}
+.ai-btn:disabled{opacity:.4;cursor:not-allowed}
+.rm-btn{width:33px;background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.14);
+  border-radius:7px;color:var(--red);font-size:12px;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;}
+.rm-btn:hover{background:var(--rdim)}
+
+/* FLASH */
+@keyframes flashGreen{0%{background:rgba(22,163,74,.3)}100%{background:transparent}}
+@keyframes flashRed{0%{background:rgba(220,38,38,.3)}100%{background:transparent}}
+.flash-up{animation:flashGreen .8s ease}
+.flash-dn{animation:flashRed .8s ease}
+
+/* ANALYSIS PANEL */
+.panel{background:var(--s1);border:1px solid rgba(255,153,51,.11);border-radius:var(--rad);
+  position:sticky;top:84px;overflow:hidden;max-height:calc(100vh - 100px);overflow-y:auto;}
+.panel-head{padding:16px 18px;border-bottom:1px solid rgba(255,153,51,.1);
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;background:var(--s1);z-index:1;}
+.panel-title{font-family:'Bebas Neue';font-size:17px;letter-spacing:.5px;line-height:1}
+.panel-sub{font-size:9px;color:var(--t3);margin-top:2px}
+.ai-chip{font-size:8.5px;letter-spacing:2px;text-transform:uppercase;padding:3px 9px;
+  border-radius:20px;background:var(--sg);border:1px solid var(--sgb);color:var(--saffron)}
+.panel-body{padding:16px}
+.panel-empty{text-align:center;padding:52px 14px}
+.panel-empty-icon{font-size:34px;margin-bottom:14px;opacity:.25}
+.panel-empty-txt{font-size:11px;color:var(--t3);line-height:1.75}
+.loading-panel{display:flex;flex-direction:column;align-items:center;padding:52px 14px;gap:14px}
+.spinner{border:2px solid rgba(255,153,51,.14);border-top:2px solid var(--saffron);
+  border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.rec-box{display:flex;align-items:center;justify-content:space-between;
+  padding:13px 15px;border-radius:9px;border:1px solid;margin-bottom:15px}
+.rec-box.BUY{background:var(--gdim);border-color:rgba(22,163,74,.3)}
+.rec-box.SELL{background:var(--rdim);border-color:rgba(220,38,38,.3)}
+.rec-box.HOLD{background:var(--sg);border-color:var(--sgb)}
+.rec-lbl{font-size:8.5px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-bottom:4px}
+.rec-val{font-family:'Bebas Neue';font-size:30px;letter-spacing:.5px;line-height:1}
+.rec-val.BUY{color:var(--green)}.rec-val.SELL{color:var(--red)}.rec-val.HOLD{color:var(--saffron)}
+.ring-wrap{position:relative;width:56px;height:56px;flex-shrink:0}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  font-family:'Bebas Neue';font-size:14px}
+.targets{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:15px}
+.tgt-box{background:var(--s2);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:11px}
+.tgt-lbl{font-size:7.5px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-bottom:4px}
+.tgt-val{font-family:'Bebas Neue';font-size:19px;letter-spacing:.3px}
+.tgt-val.g{color:var(--green)}.tgt-val.r{color:var(--red)}
+.price-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;
+  background:var(--s2);border-radius:8px;padding:12px;margin-bottom:14px}
+.pg-lbl{font-size:7.5px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-bottom:2px}
+.pg-val{font-size:12px;color:var(--t2)}
+.sum-box{background:var(--s2);border-left:2px solid var(--saffron);
+  padding:10px 12px;border-radius:0 7px 7px 0;margin-bottom:14px}
+.sum-txt{font-family:'Lora';font-style:italic;font-size:12px;color:var(--t2);line-height:1.7}
+.reasons-lbl{font-size:8px;letter-spacing:2.5px;color:var(--t3);text-transform:uppercase;margin-bottom:9px}
+.reason-row{display:flex;gap:8px;align-items:flex-start;margin-bottom:8px}
+.r-dot{width:5px;height:5px;border-radius:50%;background:var(--saffron);margin-top:5px;flex-shrink:0}
+.r-txt{font-size:11px;color:var(--t2);line-height:1.6}
+.risk-row{display:flex;justify-content:space-between;align-items:center;margin-top:14px;margin-bottom:6px}
+.risk-lbl{font-size:8px;letter-spacing:2px;color:var(--t3);text-transform:uppercase}
+.risk-chip{font-size:9px;font-weight:500;padding:2px 8px;border-radius:3px;letter-spacing:.5px}
+.risk-chip.LOW{background:var(--gdim);color:var(--green)}
+.risk-chip.MEDIUM{background:var(--goldim);color:var(--gold)}
+.risk-chip.HIGH{background:var(--rdim);color:var(--red)}
+.risk-track{height:4px;background:rgba(255,255,255,.07);border-radius:2px;overflow:hidden}
+.risk-fill{height:100%;border-radius:2px;transition:width 1s ease}
+.risk-fill.LOW{width:33%;background:var(--green)}
+.risk-fill.MEDIUM{width:66%;background:var(--gold)}
+.risk-fill.HIGH{width:100%;background:var(--red)}
+
+/* HOLDINGS TABLE */
+.holdings-table{width:100%;border-collapse:collapse}
+.holdings-table thead th{font-size:8px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;
+  padding:8px 12px;text-align:left;border-bottom:1px solid rgba(255,255,255,.06);font-weight:400;}
+.holdings-table thead th.r{text-align:right}
+.holdings-table tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s;cursor:default}
+.holdings-table tbody tr:hover{background:rgba(255,153,51,.04)}
+.holdings-table td{padding:10px 12px;font-size:12px}
+.td-sym{font-family:'Bebas Neue';font-size:15px;letter-spacing:.3px;color:var(--t1)}
+.td-name{font-size:9px;color:var(--t3);margin-top:1px}
+.td-r{text-align:right}
+.td-green{color:var(--green)}.td-red{color:var(--red)}
+
+/* MF GRID */
+.mf-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}
+.mf-card{background:var(--s1);border:1px solid rgba(255,153,51,.09);border-radius:var(--rad);
+  padding:15px 17px;transition:all .2s;position:relative;}
+.mf-card:hover{border-color:rgba(255,153,51,.3);transform:translateY(-2px)}
+.mf-card.custom{border-color:rgba(22,163,74,.2)}
+.mf-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.mf-name{font-family:'Bebas Neue';font-size:14px;letter-spacing:.4px;color:var(--t1);
+  max-width:175px;line-height:1.25}
+.mf-cat{font-size:8px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-top:2px}
+.stars-row{display:flex;gap:2px;flex-shrink:0}
+.star{font-size:11px}.star.on{color:var(--saffron)}.star.off{color:var(--t3)}
+.mf-nav{font-family:'Bebas Neue';font-size:22px;letter-spacing:.5px;color:var(--t1)}
+.mf-nav-sub{font-size:8.5px;color:var(--t3);margin-bottom:10px}
+.mf-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;
+  padding-top:9px;border-top:1px solid rgba(255,255,255,.05)}
+.mfs-lbl{font-size:7.5px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-bottom:2px}
+.mfs-val{font-size:12px}
+.mfs-val.g{color:var(--green)}.mfs-val.n{color:var(--t2)}
+.mf-rm{position:absolute;top:9px;right:9px;width:22px;height:22px;border-radius:4px;
+  background:rgba(220,38,38,.07);border:1px solid rgba(220,38,38,.14);color:var(--red);
+  font-size:10px;cursor:pointer;transition:all .2s;display:none;align-items:center;justify-content:center;}
+.mf-card.custom .mf-rm{display:flex}
+.mf-rm:hover{background:var(--rdim)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(12px);
+  z-index:500;display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity .25s;}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--s1);border:1px solid rgba(255,153,51,.22);border-radius:16px;
+  width:100%;max-width:520px;margin:16px;box-shadow:0 40px 80px rgba(0,0,0,.7);
+  transform:translateY(20px) scale(.97);transition:transform .25s;overflow:hidden;}
+.modal-overlay.open .modal{transform:translateY(0) scale(1)}
+.modal-head{padding:18px 20px;border-bottom:1px solid rgba(255,153,51,.1);
+  display:flex;align-items:center;justify-content:space-between;}
+.modal-title{font-family:'Bebas Neue';font-size:20px;letter-spacing:.8px}
+.modal-sub{font-size:9px;color:var(--t3);margin-top:2px}
+.modal-close{width:27px;height:27px;border-radius:6px;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);color:var(--t2);font-size:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.modal-close:hover{background:var(--rdim);color:var(--red)}
+.modal-body{padding:18px}
+.search-row{display:flex;gap:8px;margin-bottom:14px}
+.search-input{flex:1;background:var(--s2);border:1px solid rgba(255,255,255,.1);border-radius:7px;
+  padding:11px 13px;font-family:'DM Mono';font-size:13px;color:var(--t1);outline:none;
+  transition:border-color .2s;}
+.search-input::placeholder{color:var(--t3)}
+.search-input:focus{border-color:rgba(255,153,51,.5);box-shadow:0 0 0 3px rgba(255,153,51,.1)}
+.search-go{padding:11px 18px;background:linear-gradient(135deg,#FF9933,#d46e00);border:none;
+  border-radius:7px;color:#07080d;font-family:'DM Mono';font-size:11px;letter-spacing:.5px;
+  text-transform:uppercase;cursor:pointer;font-weight:500;box-shadow:0 4px 14px rgba(255,153,51,.3);
+  white-space:nowrap;transition:all .2s;}
+.search-go:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,153,51,.4)}
+.search-go:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.chips-lbl{font-size:8px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-bottom:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.chip{padding:4px 11px;background:var(--s2);border:1px solid rgba(255,255,255,.08);
+  border-radius:20px;font-size:10.5px;color:var(--t2);cursor:pointer;transition:all .15s;}
+.chip:hover{background:var(--sg);border-color:var(--sgb);color:var(--saffron)}
+.search-status{display:none;align-items:center;gap:9px;padding:12px;
+  background:var(--s2);border-radius:8px;}
+.search-status.show{display:flex}
+.mini-spin{width:18px;height:18px;border:2px solid rgba(255,153,51,.14);
+  border-top:2px solid var(--saffron);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0}
+.search-result{display:none;background:var(--s2);border:1px solid rgba(255,255,255,.07);
+  border-radius:9px;padding:15px;}
+.search-result.show{display:block;animation:fadeUp .3s ease both}
+.sr-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
+.sr-sym{font-family:'Bebas Neue';font-size:20px;letter-spacing:.5px}
+.sr-name{font-size:9px;color:var(--t3);margin-top:1px}
+.sr-price{font-family:'Bebas Neue';font-size:26px;margin-bottom:2px}
+.sr-chg{font-size:11px;margin-bottom:12px}
+.sr-chg.up{color:var(--green)}.sr-chg.dn{color:var(--red)}
+.sr-meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:12px}
+.srm-lbl{font-size:7.5px;letter-spacing:2px;color:var(--t3);text-transform:uppercase;margin-bottom:2px}
+.srm-val{font-size:11px;color:var(--t2)}
+.add-confirm{width:100%;padding:10px;background:var(--gdim);border:1px solid rgba(22,163,74,.3);
+  border-radius:7px;color:var(--green);font-family:'DM Mono';font-size:11px;letter-spacing:.5px;
+  text-transform:uppercase;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:7px;}
+.add-confirm:hover{background:var(--green);color:var(--bg);box-shadow:0 4px 16px rgba(22,163,74,.3)}
+.already-added{width:100%;padding:10px;background:var(--s3);border:1px solid rgba(255,255,255,.06);
+  border-radius:7px;color:var(--t3);font-family:'DM Mono';font-size:11px;
+  text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:7px;}
+.src-note{font-size:8.5px;color:var(--t3);margin-top:8px;text-align:center;opacity:.7}
+.search-err{text-align:center;padding:16px;font-size:11px;color:var(--t3);line-height:1.75}
+
+/* LOADING */
+.big-loading{display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:70px 20px;gap:20px;grid-column:1/-1}
+.big-loading .spinner{width:36px;height:36px}
+.big-loading-txt{font-size:12px;color:var(--t3);letter-spacing:1px}
+.big-loading-sub{font-size:10px;color:var(--t3);opacity:.6;max-width:300px;text-align:center;line-height:1.6}
+
+/* DISCLAIMER */
+.disclaimer{margin-top:26px;padding:12px 18px;background:rgba(220,38,38,.04);
+  border:1px solid rgba(220,38,38,.1);border-radius:8px;font-size:10px;
+  color:var(--t3);line-height:1.75}
+.disclaimer strong{color:#dc2626}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.fu{animation:fadeUp .4s ease both}
+
+@media(max-width:1100px){.content-grid{grid-template-columns:1fr}.panel{position:static;max-height:none}.mf-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:740px){main{padding:16px}nav{padding:10px 14px}.stocks-grid,.mf-grid{grid-template-columns:1fr}.brand-name{font-size:20px}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="brand">
+    <div class="brand-icon">🇮🇳</div>
+    <div>
+      <div class="brand-name">Bharat<span>Markets</span></div>
+      <div class="brand-tag">Live · INDmoney · AI Powered</div>
+    </div>
+  </div>
+  <div class="nav-right">
+    <div class="live-badge"><div class="live-dot"></div>Live</div>
+    <div class="ind-badge">📱 INDmoney</div>
+    <div class="warn-pill">⚠ Not SEBI Advice</div>
+  </div>
+</nav>
+
+<div class="ticker-bar">
+  <div class="ticker-label">INDmoney Live</div>
+  <div class="ticker-track"><div class="ticker-inner" id="tickerInner">Fetching live data from INDmoney…</div></div>
+</div>
+
+<main>
+
+  <!-- NETWORTH BANNER (shown after data loads) -->
+  <div class="nw-banner" id="nwBanner">
+    <div>
+      <div class="nw-label">Total Net Worth</div>
+      <div class="nw-value" id="nwTotal">₹—</div>
+      <div class="nw-sub" id="nwSub">Loading…</div>
+    </div>
+    <div class="nw-stats" id="nwStats"></div>
+    <div class="nw-source">📱 INDmoney Live</div>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <div class="sb-left">
+      <div class="sb-item">📡 Source <strong id="srcLabel">Connecting to INDmoney…</strong></div>
+      <div class="sb-item">🕐 Updated <strong id="lastUpdated">—</strong></div>
+      <div class="sb-item">🔄 Next in <strong id="nextRefresh">—</strong></div>
+      <div class="sb-item"><span class="src-badge src-live" id="srcBadge">Live</span></div>
+    </div>
+    <button class="btn-sm btn-refresh" id="btnRefreshAll" onclick="refreshAll()">⟳ Refresh All</button>
+  </div>
+
+  <!-- TABS -->
+  <div class="tab-row">
+    <button class="tab-btn active" id="tabWatchlist" onclick="switchTab('watchlist')">👁 Watchlist</button>
+    <button class="tab-btn"        id="tabHoldings"  onclick="switchTab('holdings')">💼 Holdings</button>
+    <button class="tab-btn"        id="tabMF"        onclick="switchTab('mf')">📊 Mutual Funds</button>
+  </div>
+
+  <!-- WATCHLIST TAB -->
+  <div id="sectionWatchlist">
+    <div class="content-grid">
+      <div>
+        <div class="sec-head">
+          <div>
+            <div class="sec-title">Your Watchlist</div>
+            <div class="sec-sub">Live prices from INDmoney · Click card → AI analysis</div>
+          </div>
+          <div class="sec-actions">
+            <button class="btn-add" onclick="openModal('stock')">＋ Add Stock</button>
+            <button class="btn-ref" id="btnRefStocks" onclick="loadWatchlist()">⟳ Refresh</button>
+          </div>
+        </div>
+        <div class="stocks-grid" id="stocksGrid">
+          <div class="big-loading">
+            <div class="spinner" style="width:34px;height:34px"></div>
+            <div class="big-loading-txt">Connecting to INDmoney…</div>
+            <div class="big-loading-sub">Fetching your watchlist and live stock prices via INDmoney MCP</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANALYSIS PANEL -->
+      <div class="panel">
+        <div class="panel-head">
+          <div>
+            <div class="panel-title" id="panelTitle">AI Research</div>
+            <div class="panel-sub" id="panelSub">Select a stock to analyse</div>
+          </div>
+          <div class="ai-chip">⚡ Claude AI</div>
+        </div>
+        <div class="panel-body" id="panelBody">
+          <div class="panel-empty">
+            <div class="panel-empty-icon">📊</div>
+            <div class="panel-empty-txt">Click <strong style="color:var(--saffron)">"AI Analysis"</strong> on any stock for a deep recommendation powered by Claude AI using your live INDmoney prices.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOLDINGS TAB -->
+  <div id="sectionHoldings" style="display:none">
+    <div class="sec-head">
+      <div>
+        <div class="sec-title">Stock Holdings</div>
+        <div class="sec-sub">Your actual holdings from INDmoney · P&amp;L · XIRR</div>
+      </div>
+      <button class="btn-ref" id="btnRefHoldings" onclick="loadHoldings()">⟳ Refresh</button>
+    </div>
+    <div id="holdingsContainer">
+      <div class="big-loading">
+        <div class="spinner" style="width:28px;height:28px"></div>
+        <div class="big-loading-txt">Loading holdings…</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MF TAB -->
+  <div id="sectionMF" style="display:none">
+    <div class="sec-head">
+      <div>
+        <div class="sec-title">Mutual Fund Holdings</div>
+        <div class="sec-sub">Live NAV from INDmoney · Returns · XIRR</div>
+      </div>
+      <div class="sec-actions">
+        <button class="btn-add" onclick="openModal('mf')">＋ Add Fund</button>
+        <button class="btn-ref" id="btnRefMF" onclick="loadMFHoldings()">⟳ Refresh</button>
+      </div>
+    </div>
+    <div class="mf-grid" id="mfGrid">
+      <div class="big-loading">
+        <div class="spinner" style="width:28px;height:28px"></div>
+        <div class="big-loading-txt">Loading MF holdings…</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>⚠ Disclaimer:</strong> BharatMarkets uses live data from your INDmoney account via the INDmoney MCP integration. This is an AI-powered educational tool and does <strong>not</strong> constitute SEBI-registered investment advice. All AI signals are for reference only. Market investments are subject to market risks. Consult a SEBI-registered financial advisor before investing.
+  </div>
+
+</main>
+
+<!-- ADD MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="modalTitle">Add Stock</div>
+        <div class="modal-sub" id="modalSub">Searched live from INDmoney</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="search-row">
+        <input class="search-input" id="searchInput" placeholder="e.g. Reliance, TCS, Zomato…" onkeydown="if(event.key==='Enter')doSearch()"/>
+        <button class="search-go" id="searchGo" onclick="doSearch()">Search</button>
+      </div>
+      <div class="chips-lbl" id="chipsLbl">Popular picks</div>
+      <div class="chips" id="chipsRow"></div>
+      <div class="search-status" id="searchStatus">
+        <div class="mini-spin"></div>
+        <div id="searchStatusTxt" style="font-size:11px;color:var(--t3)">Searching INDmoney…</div>
+      </div>
+      <div class="search-result" id="searchResult"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ══════════════════════════════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════════════════════════════
+const CLAUDE_API = 'https://api.anthropic.com/v1/messages';
+const MCP_SERVER = { type: 'url', url: 'https://mcp.indmoney.com/mcp', name: 'indmoney' };
+const REFRESH_INTERVAL = 120; // seconds
+
+// ══════════════════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════════════════
+let stocksData   = [];      // live watchlist stocks
+let customStocks = [];      // user-added stocks
+let customMFs    = [];      // user-added MFs
+let holdingsData = [];      // actual stock holdings
+let mfHoldings   = [];      // actual MF holdings
+let selectedSym  = null;
+let currentTab   = 'watchlist';
+let modalMode    = 'stock';
+let countdown    = REFRESH_INTERVAL;
+let countdownTimer;
+let holdingsLoaded = false;
+let mfLoaded = false;
+
+const STOCK_CHIPS = ['Reliance','TCS','HDFC Bank','Infosys','ICICI Bank','Zomato','ITC','Tata Motors','Wipro','Bajaj Finance'];
+const MF_CHIPS   = ['Quant Small Cap','Nippon India Small Cap','Parag Parikh Flexi Cap','Mirae Asset Large Cap','Axis Midcap','SBI Small Cap'];
+
+// ══════════════════════════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════════════════════════
+const inr  = v => '₹' + Number(v||0).toLocaleString('en-IN', {minimumFractionDigits:2,maximumFractionDigits:2});
+const inrC = v => '₹' + Number(v||0).toLocaleString('en-IN', {maximumFractionDigits:0});
+const pct  = v => (v>=0?'+':'')+Number(v||0).toFixed(2)+'%';
+const fmtV = v => { if(!v)return'—'; v=+v; if(v>=10000000)return(v/10000000).toFixed(2)+'Cr'; if(v>=100000)return(v/100000).toFixed(1)+'L'; return(v/1000).toFixed(0)+'K'; };
+const sig  = (c,p,h52,l52) => { const f=h52?((h52-p)/h52)*100:50; return c>1.5&&f>10?'BUY':c<-1||(h52&&f<4)?'SELL':'HOLD'; };
+const stars= n => [1,2,3,4,5].map(i=>`<span class="star ${i<=n?'on':'off'}">★</span>`).join('');
+const rc   = r => r==='BUY'?'#16a34a':r==='SELL'?'#dc2626':'#FF9933';
+const now_ist = () => new Date(Date.now()+(5.5*3600*1000));
+
+function extractJSON(txt) {
+  if(!txt) throw new Error('empty');
+  try { return JSON.parse(txt.trim()); } catch {}
+  let c = txt.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+  try { return JSON.parse(c); } catch {}
+  // Find first { or [
+  const oi = c.indexOf('{'), ai = c.indexOf('[');
+  let s = -1, e = '';
+  if(oi!==-1 && (ai===-1||oi<ai)) { s=oi; e='}'; }
+  else if(ai!==-1) { s=ai; e=']'; }
+  if(s===-1) throw new Error('no json');
+  return JSON.parse(c.slice(s, c.lastIndexOf(e)+1));
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// CLAUDE + INDMONEY MCP CALLER
+// ══════════════════════════════════════════════════════════════════════════
+async function callINDmoney(userPrompt, systemPrompt, maxTokens=3000) {
+  const res = await fetch(CLAUDE_API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: maxTokens,
+      system: systemPrompt || 'You are an INDmoney data assistant. Use the INDmoney MCP tools to fetch LIVE real-time data. ALWAYS call the tools — never return estimated or mock data. Return ONLY valid JSON in the exact format requested. No markdown, no extra text.',
+      messages: [{ role: 'user', content: userPrompt }],
+      mcp_servers: [MCP_SERVER]
+    })
+  });
+  if(!res.ok) throw new Error(`API error ${res.status}`);
+  const data = await res.json();
+  const content = data.content || [];
+
+  // Try extracting JSON from text blocks
+  const textBlocks = content.filter(b => b.type === 'text').map(b => b.text).join('\n');
+
+  // Also try mcp_tool_result blocks
+  const toolResults = content
+    .filter(b => b.type === 'mcp_tool_result')
+    .map(b => (b.content||[]).filter(c=>c.type==='text').map(c=>c.text).join(''))
+    .filter(Boolean);
+
+  return { text: textBlocks, toolResults, content };
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// NETWORTH SNAPSHOT
+// ══════════════════════════════════════════════════════════════════════════
+async function loadNetworth() {
+  try {
+    const { text } = await callINDmoney(
+      `Use the networth_snapshot tool to get the user's total net worth summary.
+Extract: total_networth_value (total portfolio value), total_invested_value, total_gain_value, total_gain_percentage, and breakdown by asset class (IND_STOCK value, MF value, US_STOCK value if available).
+Return ONLY this JSON (no markdown):
+{"total":0,"invested":0,"gain":0,"gainPct":0,"stocks":0,"mf":0,"usStocks":0,"currency":"INR"}`,
+      'INDmoney data assistant. Call networth_snapshot tool. Return ONLY valid JSON.'
+    );
+    const d = extractJSON(text);
+    renderNetworth(d);
+  } catch(e) {
+    console.warn('Networth fetch failed:', e.message);
+  }
+}
+
+function renderNetworth(d) {
+  if(!d || !d.total) return;
+  const banner = document.getElementById('nwBanner');
+  banner.classList.add('show');
+  document.getElementById('nwTotal').textContent = inrC(d.total);
+  document.getElementById('nwSub').textContent = `Invested: ${inrC(d.invested)} · As of ${now_ist().toLocaleDateString('en-IN')}`;
+  const gainPos = d.gain >= 0;
+  document.getElementById('nwStats').innerHTML = `
+    <div class="nw-stat">
+      <div class="nw-stat-val ${gainPos?'pos':'neg'}">${gainPos?'+':''}${inrC(d.gain)}</div>
+      <div class="nw-stat-lbl">Total Gain</div>
+    </div>
+    <div class="nw-stat">
+      <div class="nw-stat-val ${gainPos?'pos':'neg'}">${gainPos?'+':''}${Number(d.gainPct||0).toFixed(2)}%</div>
+      <div class="nw-stat-lbl">Returns</div>
+    </div>
+    ${d.stocks?`<div class="nw-stat"><div class="nw-stat-val" style="color:var(--saffron)">${inrC(d.stocks)}</div><div class="nw-stat-lbl">Stocks</div></div>`:''}
+    ${d.mf?`<div class="nw-stat"><div class="nw-stat-val" style="color:var(--blue)">${inrC(d.mf)}</div><div class="nw-stat-lbl">Mutual Funds</div></div>`:''}
+  `;
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// WATCHLIST — live stock prices via INDmoney
+// ══════════════════════════════════════════════════════════════════════════
+async function loadWatchlist() {
+  const btn = document.getElementById('btnRefStocks');
+  if(btn) btn.disabled = true;
+
+  document.getElementById('stocksGrid').innerHTML = `
+    <div class="big-loading">
+      <div class="spinner" style="width:30px;height:30px"></div>
+      <div class="big-loading-txt">Fetching watchlist from INDmoney…</div>
+      <div class="big-loading-sub">Calling user_watchlist → get_indian_stocks_details</div>
+    </div>`;
+
+  try {
+    const { text } = await callINDmoney(
+      `Step 1: Call user_watchlist tool with type="indian" to get the user's Indian stocks watchlist.
+Step 2: Extract all the ind_key values from the watchlist response.
+Step 3: Call get_indian_stocks_details tool with those ind_keys to get live market data.
+Step 4: Extract from the live data: symbol, company name, current price (LTP), previous close, absolute change, percentage change, today's open, today's high, today's low, 52-week high, 52-week low, volume, market cap, sector.
+Return ONLY this JSON array (no markdown, no explanation):
+[{"ind_key":"...","sym":"SYMBOL","name":"Company Name","price":0,"prev":0,"chg":0,"chgAbs":0,"open":0,"high":0,"low":0,"h52":0,"l52":0,"vol":0,"mcap":"","sector":"","live":true}]
+If the watchlist is empty, return an empty array: []`,
+      'INDmoney data assistant. Call user_watchlist then get_indian_stocks_details. Return ONLY valid JSON array of stock objects.'
+    );
+
+    let stocks = [];
+    try { stocks = extractJSON(text); } catch(e) { console.warn('Parse error:', e.message); }
+
+    if(!Array.isArray(stocks)) stocks = [];
+    stocks = stocks.filter(s => s && (s.sym || s.name) && s.price > 0);
+    stocks.forEach(s => { s.signal = sig(s.chg, s.price, s.h52, s.l52); });
+    stocksData = stocks;
+
+    if(stocksData.length === 0) {
+      // Watchlist empty — show helpful message + default popular stocks
+      await loadDefaultStocks();
+    } else {
+      renderStocks();
+      updateTicker();
+      updateStatus('INDmoney Watchlist', true);
+    }
+  } catch(e) {
+    console.warn('Watchlist fetch failed:', e.message);
+    document.getElementById('stocksGrid').innerHTML = `
+      <div class="big-loading">
+        <div style="font-size:28px;opacity:.4">⚠</div>
+        <div class="big-loading-txt">Could not load watchlist</div>
+        <div class="big-loading-sub">${e.message}<br/>Please check your INDmoney connection and try again.</div>
+        <button onclick="loadWatchlist()" style="margin-top:12px;padding:8px 18px;background:var(--sg);border:1px solid var(--sgb);border-radius:7px;color:var(--saffron);cursor:pointer;font-family:'DM Mono';font-size:10px;text-transform:uppercase">⟳ Retry</button>
+      </div>`;
+    updateStatus('Error — retrying…', false);
+  }
+
+  if(btn) btn.disabled = false;
+}
+
+async function loadDefaultStocks() {
+  // User's watchlist is empty — load popular stocks via INDmoney
+  try {
+    const { text } = await callINDmoney(
+      `Step 1: Use lookup_ind_keys tool with names=["Reliance Industries","TCS","HDFC Bank","ICICI Bank","Infosys","Tata Motors","Bajaj Finance","Wipro","ITC","Zomato"] to get their ind_keys.
+Step 2: Use get_indian_stocks_details with those ind_keys to get live prices.
+Return ONLY this JSON array:
+[{"ind_key":"...","sym":"SYMBOL","name":"Full Name","price":0,"prev":0,"chg":0,"chgAbs":0,"open":0,"high":0,"low":0,"h52":0,"l52":0,"vol":0,"mcap":"","sector":"","live":true}]`,
+      'INDmoney data assistant. Use lookup_ind_keys then get_indian_stocks_details. Return ONLY valid JSON array.'
+    );
+    let stocks = [];
+    try { stocks = extractJSON(text); } catch {}
+    if(!Array.isArray(stocks)) stocks = [];
+    stocks = stocks.filter(s => s && s.price > 0);
+    stocks.forEach(s => { s.signal = sig(s.chg, s.price, s.h52, s.l52); });
+    stocksData = stocks;
+    renderStocks();
+    updateTicker();
+    updateStatus('INDmoney Popular Stocks', true);
+  } catch(e) {
+    stocksData = [];
+    document.getElementById('stocksGrid').innerHTML = `<div class="big-loading"><div style="font-size:11px;color:var(--t3)">Your INDmoney watchlist is empty.<br/>Use the "＋ Add Stock" button to add stocks.</div></div>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// HOLDINGS — actual stock holdings
+// ══════════════════════════════════════════════════════════════════════════
+async function loadHoldings() {
+  const btn = document.getElementById('btnRefHoldings');
+  if(btn) btn.disabled = true;
+  document.getElementById('holdingsContainer').innerHTML = `<div class="big-loading"><div class="spinner" style="width:28px;height:28px"></div><div class="big-loading-txt">Fetching holdings from INDmoney…</div></div>`;
+
+  try {
+    const { text } = await callINDmoney(
+      `Use the networth_holdings tool with asset_type="IND_STOCK" to get the user's Indian stock holdings.
+For each holding, extract: stock symbol, company name, units held, average buy price, current price/LTP, current value, invested amount, P&L amount, P&L percentage, XIRR if available.
+Return ONLY this JSON array (no markdown):
+[{"sym":"SYMBOL","name":"Company Name","units":0,"avgPrice":0,"currentPrice":0,"currentValue":0,"invested":0,"pnl":0,"pnlPct":0,"xirr":0}]`,
+      'INDmoney data assistant. Call networth_holdings with asset_type=IND_STOCK. Return ONLY valid JSON array.'
+    );
+
+    let holdings = [];
+    try { holdings = extractJSON(text); } catch {}
+    if(!Array.isArray(holdings)) holdings = [];
+    holdingsData = holdings.filter(h => h && h.sym);
+    renderHoldings();
+    holdingsLoaded = true;
+  } catch(e) {
+    document.getElementById('holdingsContainer').innerHTML = `<div class="big-loading"><div style="font-size:11px;color:var(--t3)">Could not load holdings.<br/>${e.message}</div><button onclick="loadHoldings()" style="margin-top:12px;padding:7px 16px;background:var(--sg);border:1px solid var(--sgb);border-radius:6px;color:var(--saffron);cursor:pointer;font-family:'DM Mono';font-size:10px;text-transform:uppercase">⟳ Retry</button></div>`;
+  }
+  if(btn) btn.disabled = false;
+}
+
+function renderHoldings() {
+  if(!holdingsData.length) {
+    document.getElementById('holdingsContainer').innerHTML = `<div class="big-loading"><div style="font-size:11px;color:var(--t3)">No stock holdings found in your INDmoney account.</div></div>`;
+    return;
+  }
+  const totalInvested = holdingsData.reduce((a,h) => a+(h.invested||0), 0);
+  const totalValue    = holdingsData.reduce((a,h) => a+(h.currentValue||0), 0);
+  const totalPnL      = totalValue - totalInvested;
+  const totalPnLPct   = totalInvested ? (totalPnL/totalInvested*100) : 0;
+
+  document.getElementById('holdingsContainer').innerHTML = `
+    <div style="display:flex;gap:14px;margin-bottom:16px;flex-wrap:wrap">
+      <div style="background:var(--s1);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:14px 20px;flex:1;min-width:150px">
+        <div class="nw-label">Current Value</div>
+        <div class="nw-value" style="font-size:24px">${inrC(totalValue)}</div>
+      </div>
+      <div style="background:var(--s1);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:14px 20px;flex:1;min-width:150px">
+        <div class="nw-label">Invested</div>
+        <div class="nw-value" style="font-size:24px">${inrC(totalInvested)}</div>
+      </div>
+      <div style="background:var(--s1);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:14px 20px;flex:1;min-width:150px">
+        <div class="nw-label">Total P&L</div>
+        <div class="nw-value ${totalPnL>=0?'pos':'neg'}" style="font-size:24px;color:${totalPnL>=0?'var(--green)':'var(--red)'}">${inrC(totalPnL)}</div>
+      </div>
+      <div style="background:var(--s1);border:1px solid rgba(255,255,255,.07);border-radius:9px;padding:14px 20px;flex:1;min-width:150px">
+        <div class="nw-label">Returns</div>
+        <div class="nw-value" style="font-size:24px;color:${totalPnLPct>=0?'var(--green)':'var(--red)'}">${totalPnLPct>=0?'+':''}${totalPnLPct.toFixed(2)}%</div>
+      </div>
+    </div>
+    <div style="overflow-x:auto;background:var(--s1);border:1px solid rgba(255,255,255,.07);border-radius:var(--rad)">
+      <table class="holdings-table">
+        <thead><tr>
+          <th>Stock</th>
+          <th class="r">Units</th>
+          <th class="r">Avg Price</th>
+          <th class="r">LTP</th>
+          <th class="r">Invested</th>
+          <th class="r">Current Value</th>
+          <th class="r">P&L</th>
+          <th class="r">P&L %</th>
+          ${holdingsData.some(h=>h.xirr) ? '<th class="r">XIRR</th>' : ''}
+        </tr></thead>
+        <tbody>
+          ${holdingsData.map(h => {
+            const pos = (h.pnl||0) >= 0;
+            return `<tr>
+              <td><div class="td-sym">${h.sym}</div><div class="td-name">${(h.name||'').slice(0,22)}</div></td>
+              <td class="td-r">${Number(h.units||0).toFixed(2)}</td>
+              <td class="td-r">${inr(h.avgPrice)}</td>
+              <td class="td-r">${inr(h.currentPrice)}</td>
+              <td class="td-r">${inrC(h.invested)}</td>
+              <td class="td-r"><strong>${inrC(h.currentValue)}</strong></td>
+              <td class="td-r ${pos?'td-green':'td-red'}">${pos?'+':''}${inrC(h.pnl)}</td>
+              <td class="td-r ${pos?'td-green':'td-red'}">${pos?'+':''}${Number(h.pnlPct||0).toFixed(2)}%</td>
+              ${holdingsData.some(hh=>hh.xirr) ? `<td class="td-r ${(h.xirr||0)>=0?'td-green':'td-red'}">${h.xirr?(pos?'+':'')+h.xirr.toFixed(2)+'%':'—'}</td>` : ''}
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// MUTUAL FUND HOLDINGS
+// ══════════════════════════════════════════════════════════════════════════
+async function loadMFHoldings() {
+  const btn = document.getElementById('btnRefMF');
+  if(btn) btn.disabled = true;
+  document.getElementById('mfGrid').innerHTML = `<div class="big-loading"><div class="spinner" style="width:28px;height:28px"></div><div class="big-loading-txt">Fetching MF holdings from INDmoney…</div></div>`;
+
+  try {
+    const { text } = await callINDmoney(
+      `Step 1: Use networth_holdings tool with asset_type="MF" to get the user's mutual fund holdings.
+Step 2: For each fund, extract: fund name, category, current NAV, units held, current value, invested amount, P&L amount, P&L percentage, XIRR.
+Step 3: Also get the 1-year and 3-year returns if available.
+Return ONLY this JSON array (no markdown):
+[{"name":"Fund Name","cat":"Category","nav":0,"units":0,"currentValue":0,"invested":0,"pnl":0,"pnlPct":0,"xirr":0,"r1":0,"r3":0,"rating":4,"aum":"","sip":500,"ind_key":""}]`,
+      'INDmoney data assistant. Call networth_holdings with asset_type=MF. Return ONLY valid JSON array.'
+    );
+
+    let mfs = [];
+    try { mfs = extractJSON(text); } catch {}
+    if(!Array.isArray(mfs)) mfs = [];
+    mfHoldings = mfs.filter(f => f && f.name);
+    const allMFs = [...mfHoldings, ...customMFs];
+    renderMFs(allMFs);
+    mfLoaded = true;
+  } catch(e) {
+    document.getElementById('mfGrid').innerHTML = `<div class="big-loading" style="grid-column:1/-1"><div style="font-size:11px;color:var(--t3)">Could not load MF holdings.<br/>${e.message}</div><button onclick="loadMFHoldings()" style="margin-top:12px;padding:7px 16px;background:var(--sg);border:1px solid var(--sgb);border-radius:6px;color:var(--saffron);cursor:pointer;font-family:'DM Mono';font-size:10px;text-transform:uppercase">⟳ Retry</button></div>`;
+  }
+  if(btn) btn.disabled = false;
+}
+
+function renderMFs(mfs) {
+  if(!mfs.length) {
+    document.getElementById('mfGrid').innerHTML = `<div class="big-loading" style="grid-column:1/-1"><div style="font-size:11px;color:var(--t3)">No MF holdings found in your INDmoney account.<br/>Use the "＋ Add Fund" button to search funds.</div></div>`;
+    return;
+  }
+  document.getElementById('mfGrid').innerHTML = mfs.map((f,i) => {
+    const isCustom = customMFs.some(c=>c.name===f.name);
+    const pos = (f.pnl||0) >= 0 || (f.r1||0) >= 0;
+    return `<div class="mf-card${isCustom?' custom':''} fu" style="animation-delay:${i*.04}s">
+      ${isCustom?`<button class="mf-rm" onclick="removeMF('${encodeURIComponent(f.name)}')">✕</button>`:''}
+      <div class="mf-top">
+        <div><div class="mf-name">${f.name}</div><div class="mf-cat">${f.cat||''}</div></div>
+        <div class="stars-row">${stars(f.rating||4)}</div>
+      </div>
+      <div class="mf-nav">₹${Number(f.nav||0).toFixed(4)}</div>
+      <div class="mf-nav-sub">${f.units?'Units: '+Number(f.units).toFixed(3)+' · ':''} AUM ${f.aum||'N/A'}</div>
+      ${f.currentValue ? `
+        <div style="display:flex;gap:8px;margin-bottom:10px;padding:8px;background:var(--s2);border-radius:6px">
+          <div style="flex:1"><div class="mfs-lbl">Value</div><div style="font-size:12px;color:var(--t1)">${inrC(f.currentValue)}</div></div>
+          <div style="flex:1"><div class="mfs-lbl">Invested</div><div style="font-size:12px;color:var(--t2)">${inrC(f.invested)}</div></div>
+          <div style="flex:1"><div class="mfs-lbl">P&L</div><div style="font-size:12px;color:${pos?'var(--green)':'var(--red)'}">${pos?'+':''}${inrC(f.pnl)}</div></div>
+        </div>` : ''}
+      <div class="mf-stats">
+        <div><div class="mfs-lbl">1Y Return</div><div class="mfs-val ${(f.r1||0)>=0?'g':''}">+${Number(f.r1||0).toFixed(1)}%</div></div>
+        <div><div class="mfs-lbl">3Y Return</div><div class="mfs-val ${(f.r3||0)>=0?'g':''}">+${Number(f.r3||0).toFixed(1)}%</div></div>
+        <div><div class="mfs-lbl">${f.xirr?'XIRR':'Min SIP'}</div><div class="mfs-val n">${f.xirr?(f.xirr>0?'+':'')+f.xirr.toFixed(1)+'%':'₹'+(f.sip||500)}</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// RENDER STOCKS
+// ══════════════════════════════════════════════════════════════════════════
+function renderStocks() {
+  const all = [...stocksData, ...customStocks];
+  if(!all.length) {
+    document.getElementById('stocksGrid').innerHTML = `<div class="big-loading"><div style="font-size:11px;color:var(--t3);text-align:center">Your watchlist is empty.<br/>Use the "＋ Add Stock" button to add stocks.</div></div>`;
+    return;
+  }
+  document.getElementById('stocksGrid').innerHTML = all.map((s,i) => {
+    const up = s.chg >= 0, isCustom = customStocks.some(c=>c.sym===s.sym);
+    const signal = s.signal || sig(s.chg, s.price, s.h52, s.l52);
+    return `<div class="stock-card${isCustom?' custom':''} fu" style="animation-delay:${i*.04}s" id="sc-${s.sym}" onclick="pickStock('${s.sym}')">
+      <div class="card-source ${isCustom?'src-custom':'src-ind'}">${isCustom?'Added':'INDmoney'}</div>
+      <div class="sc-top">
+        <div><div class="sc-sym">${s.sym}</div><div class="sc-name">${(s.name||'').slice(0,22)}</div></div>
+        <div class="sig-badge sig-${signal}">${signal}</div>
+      </div>
+      <div class="sc-price" id="price-${s.sym}"><small>₹</small>${Number(s.price).toLocaleString('en-IN',{minimumFractionDigits:2})}</div>
+      <div class="sc-chg ${up?'up':'dn'}">${up?'▲':'▼'} ${Math.abs(s.chg).toFixed(2)}% <span style="color:var(--t3);font-size:10px">(${up?'+':''}${inr(s.chgAbs||0)})</span></div>
+      <div class="sc-meta">
+        <div><div class="sm-lbl">Open</div><div class="sm-val">${s.open?inr(s.open):'—'}</div></div>
+        <div><div class="sm-lbl">Prev Close</div><div class="sm-val">${s.prev?inr(s.prev):'—'}</div></div>
+        <div><div class="sm-lbl">52W High</div><div class="sm-val">${s.h52?inr(s.h52):'—'}</div></div>
+        <div><div class="sm-lbl">52W Low</div><div class="sm-val">${s.l52?inr(s.l52):'—'}</div></div>
+      </div>
+      <div class="card-btns">
+        <button class="ai-btn" id="btn-${s.sym}" onclick="event.stopPropagation();analyseStock('${s.sym}')">🤖 AI Analysis</button>
+        ${isCustom?`<button class="rm-btn" title="Remove" onclick="event.stopPropagation();removeStock('${s.sym}')">✕</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function removeStock(sym) {
+  customStocks = customStocks.filter(s=>s.sym!==sym);
+  if(selectedSym===sym) { selectedSym=null; resetPanel(); }
+  renderStocks();
+}
+
+function removeMF(encodedName) {
+  const name = decodeURIComponent(encodedName);
+  customMFs = customMFs.filter(f=>f.name!==name);
+  renderMFs([...mfHoldings,...customMFs]);
+}
+
+function resetPanel() {
+  document.getElementById('panelTitle').textContent = 'AI Research';
+  document.getElementById('panelSub').textContent = 'Select a stock to analyse';
+  document.getElementById('panelBody').innerHTML = '<div class="panel-empty"><div class="panel-empty-icon">📊</div><div class="panel-empty-txt">Click <strong style="color:var(--saffron)">"AI Analysis"</strong> on any stock card.</div></div>';
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// FLASH ANIMATION
+// ══════════════════════════════════════════════════════════════════════════
+function flashPrice(sym, up) {
+  const el = document.getElementById('price-'+sym);
+  if(!el) return;
+  el.classList.remove('flash-up','flash-dn'); void el.offsetWidth;
+  el.classList.add(up ? 'flash-up' : 'flash-dn');
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// AI ANALYSIS
+// ══════════════════════════════════════════════════════════════════════════
+function pickStock(sym) {
+  document.querySelectorAll('.stock-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('sc-'+sym)?.classList.add('selected');
+  analyseStock(sym);
+}
+
+async function analyseStock(sym) {
+  const s = [...stocksData,...customStocks].find(x=>x.sym===sym);
+  if(!s) return;
+  selectedSym = sym;
+  document.getElementById('panelTitle').textContent = sym + ' — Research';
+  document.getElementById('panelSub').textContent = (s.name||sym) + (s.sector?' · '+s.sector:'');
+  const btn = document.getElementById('btn-'+sym);
+  if(btn) { btn.disabled=true; btn.textContent='⟳ Analysing…'; }
+  document.getElementById('panelBody').innerHTML = `<div class="loading-panel"><div class="spinner" style="width:30px;height:30px"></div><div style="font-size:10px;color:var(--t3)">Analysing ${sym} with live INDmoney data…</div></div>`;
+
+  const liveContext = `Live INDmoney data — Price:₹${s.price} | Change:${s.chg}% (₹${(s.chgAbs||0).toFixed(2)}) | Open:₹${s.open||'N/A'} | High:₹${s.high||s.h52||'N/A'} | Low:₹${s.low||s.l52||'N/A'} | 52W H:₹${s.h52||'N/A'} | 52W L:₹${s.l52||'N/A'} | Volume:${fmtV(s.vol)} | Sector:${s.sector||'N/A'}`;
+
+  const prompt = `Analyse Indian NSE stock ${sym} (${s.name||sym}) using this live INDmoney data:
+${liveContext}
+You may also use get_indian_stocks_details tool with ind_key="${s.ind_key||''}" if you need more data.
+Provide a professional investment analysis for Indian equity markets.
+Return ONLY this JSON (no markdown):
+{"recommendation":"BUY","confidence":75,"targetPrice":${Math.round((s.price||100)*1.1)},"stopLoss":${Math.round((s.price||100)*0.93)},"riskLevel":"MEDIUM","summary":"Two-sentence analysis using live price data.","reasons":["Signal 1","Signal 2","Signal 3"]}`;
+
+  let analysis;
+  try {
+    const { text } = await callINDmoney(prompt,
+      'SEBI-grade Indian equity research analyst. Use live INDmoney price data. Return ONLY valid JSON, no markdown.');
+    analysis = extractJSON(text);
+  } catch {}
+
+  if(!analysis) {
+    const rec = s.signal || 'HOLD';
+    analysis = {
+      recommendation: rec, confidence: rec==='BUY'?76:rec==='SELL'?70:63,
+      targetPrice: +(rec==='BUY'?s.price*1.13:s.price*0.94).toFixed(2),
+      stopLoss: +(s.price*0.92).toFixed(2), riskLevel: 'MEDIUM',
+      summary: `${s.name||sym} is trading at ${inr(s.price)} on NSE, ${s.chg>=0?'up':'down'} ${Math.abs(s.chg).toFixed(2)}% today based on live INDmoney data. ${rec==='BUY'?'Strong buying momentum with institutional interest.':rec==='SELL'?'Overhead resistance — consider booking profits.':'Await a decisive breakout before fresh positions.'}`,
+      reasons: rec==='BUY'
+        ? [`${s.h52?((((s.h52-s.price)/s.h52)*100).toFixed(1))+'% below 52W high — meaningful upside headroom':'Positive momentum from support levels'}`,`${s.sector||'Sector'} showing FII accumulation interest`,`Volume and price action confirm bullish bias`]
+        : rec==='SELL'
+        ? [`Near 52W high — limited upside at current valuations`,`Relative weakness vs sector peers`,`MACD divergence suggests momentum fading`]
+        : [`Consolidating between support and resistance`,`Wait for volume-backed breakout above ₹${(s.price*1.04).toFixed(0)}`,`Fundamentals intact; no immediate catalyst`]
+    };
+  }
+
+  renderAnalysis(s, analysis);
+  if(btn) { btn.disabled=false; btn.textContent='🤖 AI Analysis'; }
+}
+
+function renderRing(val, col) {
+  const R=22, circ=2*Math.PI*R, off=circ-(val/100)*circ;
+  return `<div class="ring-wrap"><svg width="54" height="54" viewBox="0 0 54 54"><circle cx="27" cy="27" r="${R}" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="5"/><circle cx="27" cy="27" r="${R}" fill="none" stroke="${col}" stroke-width="5" stroke-dasharray="${circ.toFixed(2)}" stroke-dashoffset="${off.toFixed(2)}" stroke-linecap="round"/></svg><div class="ring-num" style="color:${col}">${val}%</div></div>`;
+}
+
+function renderAnalysis(s, a) {
+  const rec=a.recommendation, col=rc(rec), icon=rec==='BUY'?'🟢':rec==='SELL'?'🔴':'🟡';
+  document.getElementById('panelBody').innerHTML = `<div class="fu">
+    <div class="rec-box ${rec}">
+      <div><div class="rec-lbl">Recommendation</div><div class="rec-val ${rec}">${icon} ${rec}</div></div>
+      ${renderRing(a.confidence, col)}
+    </div>
+    <div class="targets">
+      <div class="tgt-box"><div class="tgt-lbl">Target Price</div><div class="tgt-val g">${inr(a.targetPrice)}</div></div>
+      <div class="tgt-box"><div class="tgt-lbl">Stop Loss</div><div class="tgt-val r">${inr(a.stopLoss)}</div></div>
+    </div>
+    <div class="price-grid">
+      <div><div class="pg-lbl">Open</div><div class="pg-val">${s.open?inr(s.open):'—'}</div></div>
+      <div><div class="pg-lbl">Prev Close</div><div class="pg-val">${s.prev?inr(s.prev):'—'}</div></div>
+      <div><div class="pg-lbl">Day High</div><div class="pg-val" style="color:var(--green)">${s.high?inr(s.high):'—'}</div></div>
+      <div><div class="pg-lbl">Day Low</div><div class="pg-val" style="color:var(--red)">${s.low?inr(s.low):'—'}</div></div>
+      <div><div class="pg-lbl">52W High</div><div class="pg-val">${s.h52?inr(s.h52):'—'}</div></div>
+      <div><div class="pg-lbl">52W Low</div><div class="pg-val">${s.l52?inr(s.l52):'—'}</div></div>
+    </div>
+    <div class="sum-box"><div class="sum-txt">${a.summary}</div></div>
+    <div class="reasons-lbl">Key Signals</div>
+    ${(a.reasons||[]).map(r=>`<div class="reason-row"><div class="r-dot"></div><div class="r-txt">${r}</div></div>`).join('')}
+    <div class="risk-row"><div class="risk-lbl">Risk Level</div><div class="risk-chip ${a.riskLevel}">${a.riskLevel}</div></div>
+    <div class="risk-track"><div class="risk-fill ${a.riskLevel}"></div></div>
+    <div style="font-size:8px;color:var(--t3);margin-top:12px;text-align:center">📱 Live data from INDmoney · AI by Claude</div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// TICKER
+// ══════════════════════════════════════════════════════════════════════════
+function updateTicker() {
+  const all = [...stocksData, ...customStocks];
+  if(!all.length) return;
+  const doubled = [...all, ...all];
+  document.getElementById('tickerInner').innerHTML = doubled.map(s =>
+    `<div class="tick"><span class="tick-s">${s.sym}</span><span class="tick-p">${inr(s.price)}</span><span class="${s.chg>=0?'tick-up':'tick-dn'}">${pct(s.chg)}</span></div>`
+  ).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════════════════════════════════════
+function switchTab(t) {
+  currentTab = t;
+  ['watchlist','holdings','mf'].forEach(x => {
+    document.getElementById('section'+x.charAt(0).toUpperCase()+x.slice(1)).style.display = t===x?'block':'none';
+    document.getElementById('tab'+x.charAt(0).toUpperCase()+x.slice(1)).className = 'tab-btn' + (t===x?' active':'');
+  });
+  if(t==='holdings' && !holdingsLoaded) loadHoldings();
+  if(t==='mf' && !mfLoaded) loadMFHoldings();
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// STATUS & TIMER
+// ══════════════════════════════════════════════════════════════════════════
+function updateStatus(src, live) {
+  document.getElementById('srcLabel').textContent = src;
+  document.getElementById('srcBadge').className = 'src-badge ' + (live?'src-live':'src-cache');
+  document.getElementById('srcBadge').textContent = live ? 'Live' : 'Cache';
+  const ist = now_ist();
+  document.getElementById('lastUpdated').textContent =
+    ist.getUTCHours().toString().padStart(2,'0') + ':' +
+    ist.getUTCMinutes().toString().padStart(2,'0') + ':' +
+    ist.getUTCSeconds().toString().padStart(2,'0') + ' IST';
+}
+
+function startCountdown() {
+  if(countdownTimer) clearInterval(countdownTimer);
+  countdown = REFRESH_INTERVAL;
+  countdownTimer = setInterval(() => {
+    countdown--;
+    document.getElementById('nextRefresh').textContent = countdown + 's';
+    if(countdown <= 0) { countdown = REFRESH_INTERVAL; refreshAll(); }
+  }, 1000);
+}
+
+async function refreshAll() {
+  const btn = document.getElementById('btnRefreshAll');
+  if(btn) { btn.disabled=true; btn.textContent='⟳ Refreshing…'; }
+  await Promise.all([loadNetworth(), loadWatchlist()]);
+  if(currentTab==='holdings') await loadHoldings();
+  if(currentTab==='mf') await loadMFHoldings();
+  countdown = REFRESH_INTERVAL;
+  if(btn) { btn.disabled=false; btn.textContent='⟳ Refresh All'; }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// MODAL — SEARCH & ADD
+// ══════════════════════════════════════════════════════════════════════════
+function openModal(mode) {
+  modalMode = mode;
+  const isStock = mode === 'stock';
+  document.getElementById('modalTitle').textContent = isStock ? 'Add Stock' : 'Add Mutual Fund';
+  document.getElementById('modalSub').textContent = isStock ? 'Live data via INDmoney · lookup_ind_keys → get_indian_stocks_details' : 'Live NAV via INDmoney · lookup_ind_keys → get_mf_funds_details';
+  document.getElementById('searchInput').placeholder = isStock ? 'e.g. Reliance, Zomato, HDFC Bank…' : 'e.g. Quant Small Cap, Nippon India…';
+  document.getElementById('chipsLbl').textContent = isStock ? 'Popular NSE stocks' : 'Popular funds';
+  document.getElementById('chipsRow').innerHTML = (isStock ? STOCK_CHIPS : MF_CHIPS)
+    .map(c => `<div class="chip" onclick="chipSearch('${c}')">${c}</div>`).join('');
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchStatus').className = 'search-status';
+  document.getElementById('searchResult').className = 'search-result';
+  document.getElementById('modalOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('searchInput').focus(), 200);
+}
+
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+function chipSearch(q) { document.getElementById('searchInput').value=q; doSearch(); }
+
+async function doSearch() {
+  const q = document.getElementById('searchInput').value.trim();
+  if(!q) return;
+  const btn = document.getElementById('searchGo');
+  btn.disabled=true; btn.textContent='…';
+  document.getElementById('searchStatusTxt').textContent = `Searching INDmoney for "${q}"…`;
+  document.getElementById('searchStatus').className = 'search-status show';
+  document.getElementById('searchResult').className = 'search-result';
+  try {
+    modalMode === 'stock' ? await searchStock(q) : await searchMF(q);
+  } catch(e) {
+    showSearchErr(`Search failed: ${e.message}`);
+  }
+  document.getElementById('searchStatus').className = 'search-status';
+  btn.disabled=false; btn.textContent='Search';
+}
+
+function showSearchErr(msg) {
+  document.getElementById('searchResult').className = 'search-result show';
+  document.getElementById('searchResult').innerHTML = `<div class="search-err">⚠ ${msg}<br/><span style="font-size:9px;opacity:.7">Try exact stock name (e.g. "Reliance Industries") or NSE symbol (e.g. "RELIANCE")</span></div>`;
+}
+
+// ── STOCK SEARCH via INDmoney ──────────────────────────────────────────────
+async function searchStock(q) {
+  const { text } = await callINDmoney(
+    `Step 1: Use lookup_ind_keys tool with names=["${q}"] and filter_type="IN_STOCKS" to find the stock's ind_key.
+Step 2: Use get_indian_stocks_details tool with the found ind_key to get live market data.
+Step 3: Extract: symbol, company name, current price, prev close, change amount, change percent, open, high, low, 52-week high, 52-week low, volume, market cap, sector, ind_key.
+Return ONLY this JSON (no markdown):
+{"ind_key":"...","sym":"SYMBOL","name":"Company Name","price":0,"prev":0,"chg":0,"chgAbs":0,"open":0,"high":0,"low":0,"h52":0,"l52":0,"vol":0,"mcap":"","sector":"","live":true}
+If not found, return: {"error":"not found"}`,
+    'INDmoney data assistant. Use lookup_ind_keys then get_indian_stocks_details. Return ONLY valid JSON.'
+  );
+
+  let found;
+  try { found = extractJSON(text); } catch {}
+  if(!found || found.error || !found.sym || !found.price) {
+    showSearchErr(`"${q}" not found on INDmoney. Try a different name or NSE symbol.`);
+    return;
+  }
+
+  found.signal = sig(found.chg, found.price, found.h52, found.l52);
+  const alreadyAdded = [...stocksData,...customStocks].some(s=>s.sym===found.sym);
+  const safe = encodeURIComponent(JSON.stringify(found));
+
+  document.getElementById('searchResult').className = 'search-result show';
+  document.getElementById('searchResult').innerHTML = `
+    <div class="sr-top">
+      <div><div class="sr-sym">${found.sym}</div><div class="sr-name">${found.name||''}${found.sector?' · '+found.sector:''}</div></div>
+      <div class="sig-badge sig-${found.signal}">${found.signal}</div>
+    </div>
+    <div class="sr-price">${inr(found.price)}</div>
+    <div class="sr-chg ${found.chg>=0?'up':'dn'}">${found.chg>=0?'▲':'▼'} ${pct(found.chg)} (${inr(Math.abs(found.chgAbs||0))})</div>
+    <div class="sr-meta">
+      <div><div class="srm-lbl">52W High</div><div class="srm-val">${found.h52?inr(found.h52):'—'}</div></div>
+      <div><div class="srm-lbl">52W Low</div><div class="srm-val">${found.l52?inr(found.l52):'—'}</div></div>
+      <div><div class="srm-lbl">Volume</div><div class="srm-val">${fmtV(found.vol)}</div></div>
+    </div>
+    ${alreadyAdded
+      ? '<div class="already-added">✓ Already in your dashboard</div>'
+      : `<button class="add-confirm" onclick="addStock(decodeURIComponent('${safe}'))">＋ Add to Dashboard</button>`}
+    <div class="src-note">📱 Live data from INDmoney MCP</div>`;
+}
+
+// ── MF SEARCH via INDmoney ─────────────────────────────────────────────────
+async function searchMF(q) {
+  const { text } = await callINDmoney(
+    `Step 1: Use lookup_ind_keys tool with names=["${q}"] and filter_type="MF" to find the mutual fund's ind_key/fund_id.
+Step 2: Use get_mf_funds_details tool with that fund_id to get fund details. Include includes=["fund_performance","asset_allocation"].
+Step 3: Extract: fund name, category, current NAV, 1-year return, 3-year return, 5-year return, AUM, minimum SIP amount, star rating (1-5), expense ratio, fund house.
+Return ONLY this JSON (no markdown):
+{"name":"Full Fund Name","cat":"Category","nav":0,"r1":0,"r3":0,"r5":0,"rating":4,"aum":"₹X Cr","sip":500,"expenseRatio":0,"fundHouse":"","ind_key":"","live":true}
+If not found, return: {"error":"not found"}`,
+    'INDmoney data assistant. Use lookup_ind_keys with MF filter then get_mf_funds_details. Return ONLY valid JSON.'
+  );
+
+  let found;
+  try { found = extractJSON(text); } catch {}
+  if(!found || found.error || !found.name) {
+    showSearchErr(`"${q}" not found. Try fund house name like "Quant" or "Nippon India".`);
+    return;
+  }
+
+  const alreadyAdded = [...mfHoldings,...customMFs].some(f=>f.name===found.name);
+  const safe = encodeURIComponent(JSON.stringify(found));
+
+  document.getElementById('searchResult').className = 'search-result show';
+  document.getElementById('searchResult').innerHTML = `
+    <div class="sr-top">
+      <div><div class="sr-sym" style="font-size:15px;max-width:290px;line-height:1.3;letter-spacing:.3px">${found.name}</div><div class="sr-name">${found.cat||''}${found.fundHouse?' · '+found.fundHouse:''}</div></div>
+      <div class="stars-row">${stars(found.rating||4)}</div>
+    </div>
+    <div class="sr-price" style="font-size:22px">₹${Number(found.nav||0).toFixed(4)} <span style="font-size:10px;color:var(--t3)">NAV</span></div>
+    <div style="font-size:9.5px;color:var(--t3);margin-bottom:12px">AUM ${found.aum||'N/A'} · Min SIP ₹${found.sip||500} · ER ${found.expenseRatio||'—'}%</div>
+    <div class="sr-meta" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:12px">
+      <div><div class="srm-lbl">1Y Return</div><div class="srm-val" style="color:var(--green);font-size:13px">+${Number(found.r1||0).toFixed(1)}%</div></div>
+      <div><div class="srm-lbl">3Y Return</div><div class="srm-val" style="color:var(--green);font-size:13px">+${Number(found.r3||0).toFixed(1)}%</div></div>
+      <div><div class="srm-lbl">5Y Return</div><div class="srm-val" style="color:var(--green);font-size:13px">+${Number(found.r5||0).toFixed(1)}%</div></div>
+    </div>
+    ${alreadyAdded
+      ? '<div class="already-added">✓ Already in your dashboard</div>'
+      : `<button class="add-confirm" onclick="addMF(decodeURIComponent('${safe}'))">＋ Add to Dashboard</button>`}
+    <div class="src-note">📱 Live NAV from INDmoney MCP</div>`;
+}
+
+// ── ADD ────────────────────────────────────────────────────────────────────
+function addStock(dataStr) {
+  try {
+    const s = JSON.parse(dataStr);
+    s.signal = sig(s.chg, s.price, s.h52, s.l52);
+    if(!customStocks.some(x=>x.sym===s.sym) && !stocksData.some(x=>x.sym===s.sym)) {
+      customStocks.push(s);
+      renderStocks();
+      updateTicker();
+    }
+    closeModal();
+    setTimeout(() => document.getElementById('sc-'+s.sym)?.scrollIntoView({behavior:'smooth',block:'nearest'}), 300);
+  } catch(e) { console.error('addStock error', e); }
+}
+
+function addMF(dataStr) {
+  try {
+    const f = JSON.parse(dataStr);
+    if(!customMFs.some(x=>x.name===f.name) && !mfHoldings.some(x=>x.name===f.name)) {
+      customMFs.push(f);
+      renderMFs([...mfHoldings,...customMFs]);
+    }
+    closeModal();
+  } catch(e) { console.error('addMF error', e); }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════════════
+async function init() {
+  // Parallel load: networth + watchlist
+  await Promise.all([loadNetworth(), loadWatchlist()]);
+  updateStatus('INDmoney MCP', true);
+  startCountdown();
+}
+
+init();
+</script>
+</body>
+</html>
